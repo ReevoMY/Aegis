@@ -18,15 +18,14 @@ public static class LicenseUtils
     /// <returns>The licensing secrets.</returns>
     internal static LicensingSecrets GetLicensingSecrets()
     {
-        if (_licenseKeys == null)
-            lock (Lock)
-            {
-                var config = new ConfigurationBuilder()
-                    .AddUserSecrets(typeof(LicenseUtils).Assembly)
-                    .Build();
+        lock (Lock)
+        {
+            var config = new ConfigurationBuilder()
+                .AddUserSecrets(typeof(LicenseUtils).Assembly)
+                .Build();
 
-                _licenseKeys = LoadLicensingSecrets(config.GetSection("LicensingSecrets"));
-            }
+            _licenseKeys = LoadLicensingSecrets(config.GetSection("LicensingSecrets"));
+        }
 
         return _licenseKeys;
     }
@@ -45,17 +44,6 @@ public static class LicenseUtils
             ApiKey = config.GetSection("ApiKey").Value!
         };
 
-        return _licenseKeys;
-    }
-    
-    /// <summary>
-    ///     Loads the licensing secrets from a configuration section.
-    /// </summary>
-    /// <param name="secrets">The licensing secrets.</param>
-    /// <returns>The licensing secrets.</returns>
-    public static LicensingSecrets LoadLicensingSecrets(LicensingSecrets secrets)
-    {
-        _licenseKeys = secrets;
         return _licenseKeys;
     }
 
@@ -84,7 +72,7 @@ public static class LicenseUtils
 
             return _licenseKeys ?? throw new KeyManagementException("Invalid license keys. Failed to load from file.");
         }
-        catch (Exception ex) when (ex is IOException or CryptographicException or JsonException)
+        catch (Exception ex)
         {
             throw new KeyManagementException("Failed to load license signature keys.", ex);
         }
@@ -122,7 +110,7 @@ public static class LicenseUtils
             File.WriteAllBytes(path, encryptedData);
             return keys;
         }
-        catch (Exception ex) when (ex is IOException or CryptographicException)
+        catch (Exception ex)
         {
             throw new KeyManagementException("Failed to generate and save license signature keys.", ex);
         }

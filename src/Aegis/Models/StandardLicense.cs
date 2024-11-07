@@ -31,5 +31,6 @@ public class StandardLicense : BaseLicense
         IssuedOn = license.IssuedOn;
     }
 
-    [JsonInclude] public string UserName { get; protected internal set; }
+    [JsonInclude]
+    public string UserName { get; protected internal set; } = string.Empty;
 }

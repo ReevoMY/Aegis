@@ -6,6 +6,7 @@ using Aegis.Enums;
 using Aegis.Exceptions;
 using Aegis.Models;
 using Aegis.Utilities;
+using Ardalis.GuardClauses;
 
 [assembly: InternalsVisibleTo("Aegis.Tests")]
 
@@ -58,55 +59,34 @@ public static class LicenseManager
     }
 
     /// <summary>
-    ///     Saves a license to a file.
+    ///     Saves a license to a byte array or to a file.
     /// </summary>
     /// <typeparam name="T">The type of license to save.</typeparam>
     /// <param name="license">The license object to save.</param>
     /// <param name="filePath">The path to the file to save the license to.</param>
     /// <param name="privateKey">The private key for signing.</param>
-    /// <exception cref="ArgumentNullException">Thrown if the license or file path is null.</exception>
-    public static void SaveLicense<T>(T license, string filePath, string? privateKey = null) where T : BaseLicense
-    {
-        ArgumentNullException.ThrowIfNull(license);
-        ArgumentNullException.ThrowIfNull(filePath);
-        if (Uri.TryCreate(filePath, UriKind.Absolute, out var uri) == false || string.IsNullOrEmpty(uri.LocalPath) ||
-            !uri.IsFile)
-            throw new ArgumentException("Invalid file path.", nameof(filePath));
-
-        // Save the combined data to the specified file
-        File.WriteAllBytes(filePath, SaveLicense(license, privateKey));
-    }
-
-    /// <summary>
-    ///     Saves a license to a byte array.
-    /// </summary>
-    /// <typeparam name="T">The type of license to save.</typeparam>
-    /// <param name="license">The license object to save.</param>
-    /// <param name="privateKey">The private key for signing.</param>
     /// <returns>A byte array containing the encrypted and signed license data.</returns>
     /// <exception cref="ArgumentNullException">Thrown if the license is null.</exception>
-    public static byte[] SaveLicense<T>(T license, string? privateKey = null) where T : BaseLicense
+    public static byte[] SaveLicense<T>(T license, string? filePath = null, string ? privateKey = null) where T : BaseLicense
     {
-        ArgumentNullException.ThrowIfNull(license);
+        Guard.Against.Null(license);
 
-        // Serialize the license object
-        var licenseData =
-            JsonSerializer.SerializeToUtf8Bytes(license, new JsonSerializerOptions { WriteIndented = true });
-
-        // Generate a unique AES secret key
+        // Generate the file bytes for the license object
+        var licenseData = JsonSerializer.SerializeToUtf8Bytes(license, new JsonSerializerOptions { WriteIndented = true });
         var aesKey = SecurityUtils.GenerateAesKey();
-
-        // Encrypt the license data using AES
         var encryptedData = SecurityUtils.EncryptData(licenseData, aesKey);
-
-        // Calculate SHA256 hash of the encrypted data
         var hash = SecurityUtils.CalculateSha256Hash(encryptedData);
-
-        // Sign the hash using RSA private key
         var signature = SecurityUtils.SignData(hash, privateKey ?? LicenseUtils.GetLicensingSecrets().PrivateKey);
+        var combinedLicenseData = CombineLicenseData(hash, signature, encryptedData, aesKey);
 
-        // Combine hash, signature, encrypted data, and AES key
-        return CombineLicenseData(hash, signature, encryptedData, aesKey);
+        // Output to file if available
+        if (filePath != null)
+        {
+            Guard.Against.NullOrEmpty(filePath, exceptionCreator: () => new DirectoryNotFoundException($"{filePath} is not a valid path."));
+            File.WriteAllBytes(filePath, combinedLicenseData);
+        }
+
+        return combinedLicenseData;
     }
 
     /// <summary>
@@ -144,8 +124,10 @@ public static class LicenseManager
         ValidationMode validationMode = ValidationMode.Offline, Dictionary<string, string?>? validationParams = null)
     {
         if (!LicenseValidator.VerifyLicenseData(licenseData, out var license, true) || license == null)
+        {
             throw new InvalidLicenseFormatException("Invalid license file format.");
-        
+        }
+
         // Set the current license based on type
         license = license.Type switch
         {
@@ -185,7 +167,7 @@ public static class LicenseManager
         if (!IsFeatureEnabled(featureName))
             throw new FeatureNotLicensedException($"Feature '{featureName}' is not allowed in your licensing model.");
     }
-    
+
     /// <summary>
     ///     Closes connection to the licensing server and releases any resources.
     /// </summary>
@@ -205,7 +187,7 @@ public static class LicenseManager
     }
 
     // Helper methods
-    
+
     /// <summary>
     ///     Validates the license asynchronously.
     /// </summary>
@@ -283,7 +265,7 @@ public static class LicenseManager
                 validationParams?["UserName"]!, int.Parse(validationParams?["MaxActiveUsersCount"]!)),
             _ => false
         };
-        
+
         if (isLicenseValid)
             isLicenseValid = LicenseValidator.ValidateLicenseRules(license, validationParams);
 
@@ -365,7 +347,7 @@ public static class LicenseManager
             throw new HeartbeatException(
                 $"Concurrent user disconnect failed: {response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
     }
-    
+
     private static byte[] CombineLicenseData(byte[] hash, byte[] signature, byte[] encryptedData, byte[] aesKey)
     {
         var combinedData = new byte[

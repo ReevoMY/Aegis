@@ -1,38 +1,60 @@
 ﻿using Aegis.Exceptions;
-using Aegis.Models;
 using Aegis.Models.Utils;
 using Aegis.Utilities;
+using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 
 namespace Aegis.Tests;
 
 public class LicenseUtilsTests
 {
-    private const string TestKey = "MySecretTestKey";
-    private const string TestApiKey = "12345678-90ab-cdef-ghij-klmnopqrst";
+    #region Fields
+
+    private readonly IConfigurationRoot _configuration;
+    private readonly string _signKey = "MySecretTestKey";
+    private readonly string _publicKey;
+    private readonly string _privateKey;
+    private readonly string _apiKey;
+
+    #endregion
+
+    public LicenseUtilsTests()
+    {
+        _configuration = new ConfigurationBuilder()
+            .AddUserSecrets(GetType().Assembly)
+            .Build();
+
+        _publicKey = _configuration.GetSection("LicensingSecrets:PublicKey").Value!;
+        _privateKey = _configuration.GetSection("LicensingSecrets:PrivateKey").Value!;
+        _apiKey = _configuration.GetSection("LicensingSecrets:ApiKey").Value!;
+    }
+
+    [Fact]
+    public void GetLicensingSecrets_LoadKeysCorrectly()
+    {
+        // Act
+        var keys = LicenseUtils.GetLicensingSecrets();
+
+        // Assert
+        keys.Should().NotBeNull();
+        keys.PublicKey.Should().Be(_publicKey);
+        keys.PrivateKey.Should().Be(_privateKey);
+        keys.ApiKey.Should().Be(_apiKey);
+    }
 
     [Fact]
     public void LoadLicensingSecrets_LoadsKeysFromConfigurationSection()
     {
         // Arrange
-        var config = new Dictionary<string, string>
-        {
-            { "LicensingSecrets:PublicKey", "TestPublicKey" },
-            { "LicensingSecrets:PrivateKey", "TestPrivateKey" },
-            { "LicensingSecrets:ApiKey", TestApiKey }
-        };
-        var configuration = new ConfigurationBuilder()
-            .AddInMemoryCollection(config!)
-            .Build();
-        var section = configuration.GetSection("LicensingSecrets");
+        var section = _configuration.GetSection("LicensingSecrets");
 
         // Act
         var keys = LicenseUtils.LoadLicensingSecrets(section);
 
         // Assert
-        Assert.Equal("TestPublicKey", keys.PublicKey);
-        Assert.Equal("TestPrivateKey", keys.PrivateKey);
-        Assert.Equal(TestApiKey, keys.ApiKey);
+        keys.PublicKey.Should().Be(_publicKey);
+        keys.PrivateKey.Should().Be(_privateKey);
+        keys.ApiKey.Should().Be(_apiKey);
     }
 
     [Fact]
@@ -41,9 +63,12 @@ public class LicenseUtilsTests
         // Arrange
         const string invalidPath = "Invalid/Path";
 
-        // Act & Assert
-        Assert.Throws<KeyManagementException>(() =>
-            LicenseUtils.LoadLicensingSecrets(TestKey, invalidPath));
+        // Act
+        var act = () => LicenseUtils.LoadLicensingSecrets(_signKey, invalidPath);
+
+        // Assert
+        act.Should().Throw<KeyManagementException>()
+            .WithMessage("Failed to load license signature keys.");
     }
 
     [Fact]
@@ -53,9 +78,12 @@ public class LicenseUtilsTests
         var filePath = Path.GetTempFileName();
         File.WriteAllText(filePath, "Invalid JSON Data"); // Write invalid JSON
 
-        // Act & Assert
-        Assert.Throws<KeyManagementException>(() =>
-            LicenseUtils.LoadLicensingSecrets(TestKey, filePath));
+        // Act
+        var act = () => LicenseUtils.LoadLicensingSecrets(_signKey, filePath);
+        
+        // Assert
+        act.Should().Throw<KeyManagementException>()
+            .WithMessage("Failed to load license signature keys.");
 
         // Clean up
         File.Delete(filePath);
@@ -65,15 +93,15 @@ public class LicenseUtilsTests
     public void LoadLicensingSecrets_LoadsKeysFromFileCorrectly()
     {
         // Arrange
-        var keys = GenerateLicensingSecrets(TestKey, out var filePath);
+        var keys = GenerateLicensingSecrets(_signKey, out var filePath);
 
         // Act
-        var loadedKeys = LicenseUtils.LoadLicensingSecrets(TestKey, filePath);
+        var loadedKeys = LicenseUtils.LoadLicensingSecrets(_signKey, filePath);
 
         // Assert
-        Assert.Equal(keys.PublicKey, loadedKeys.PublicKey);
-        Assert.Equal(keys.PrivateKey, loadedKeys.PrivateKey);
-        Assert.Equal(keys.ApiKey, loadedKeys.ApiKey);
+        loadedKeys.PublicKey.Should().Be(keys.PublicKey);
+        loadedKeys.PrivateKey.Should().Be(keys.PrivateKey);
+        loadedKeys.ApiKey.Should().Be(keys.ApiKey);
 
         // Clean up
         File.Delete(filePath);
@@ -83,36 +111,47 @@ public class LicenseUtilsTests
     public void GenerateLicensingSecrets_GeneratesAndSavesKeysCorrectly()
     {
         // Arrange & Act
-        var keys = GenerateLicensingSecrets(TestKey, out var filePath);
+        var keys = GenerateLicensingSecrets(_signKey, out var filePath);
 
         // Assert
-        Assert.NotNull(keys);
-        Assert.NotEmpty(keys.PublicKey);
-        Assert.NotEmpty(keys.PrivateKey);
-        Assert.NotEmpty(keys.ApiKey);
-        Assert.True(File.Exists(filePath));
+        keys.Should().NotBeNull();
+        keys.PublicKey.Should().NotBeNullOrEmpty();
+        keys.PrivateKey.Should().NotBeNullOrEmpty();
+        keys.ApiKey.Should().NotBeNullOrEmpty();
+        File.Exists(filePath).Should().BeTrue();
+
+        var content = File.ReadAllBytes(filePath);
+        content.Length.Should().BeGreaterThan(0);
 
         // Clean up
         File.Delete(filePath);
     }
 
-    [Fact]
-    public void GenerateLicensingSecrets_ThrowsException_ForInvalidPath()
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("Invalid/Path")]
+    public void GenerateLicensingSecrets_ThrowsException_ForInvalidPath(string invalidPath)
     {
-        // Arrange
-        const string invalidPath = "Invalid/Path";
+        // Act
+        var act = () => LicenseUtils.GenerateLicensingSecrets(_signKey, invalidPath, _apiKey);
 
-        // Act & Assert
-        Assert.Throws<KeyManagementException>(() =>
-            GenerateLicensingSecrets(TestKey, out _, invalidPath));
+        // Assert
+        act.Should().Throw<KeyManagementException>()
+            .WithMessage("Failed to generate and save license signature keys.");
     }
 
-    // Helper method to generate keys and save them to a file
-    private LicensingSecrets GenerateLicensingSecrets(string key, out string filePath,
-        string? overriddenFilePath = null)
+    #region Private
+
+    /// <summary>
+    /// Helper method to generate keys and save them to a file
+    /// </summary>
+    private LicensingSecrets GenerateLicensingSecrets(string key, out string filePath, string? overriddenFilePath = null)
     {
-        filePath = Path.GetTempFileName();
-        var keys = LicenseUtils.GenerateLicensingSecrets(key, overriddenFilePath ?? filePath, TestApiKey);
+        filePath = !string.IsNullOrEmpty(overriddenFilePath) ? overriddenFilePath : Path.GetTempFileName();
+        var keys = LicenseUtils.GenerateLicensingSecrets(key, filePath, _apiKey);
         return keys;
     }
+
+    #endregion
 }

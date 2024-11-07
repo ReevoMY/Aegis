@@ -1,36 +1,16 @@
 ﻿using System.Reflection;
+using System.Security.Cryptography;
 using System.Text.Json;
 using Aegis.Enums;
 using Aegis.Exceptions;
 using Aegis.Models;
+using Aegis.Models.Utils;
 using Aegis.Utilities;
 
 namespace Aegis.Tests;
 
 public class LicenseManagerTests
 {
-    // Helper method to generate a license for testing
-    private BaseLicense GenerateLicense(LicenseType type = LicenseType.Standard)
-    {
-        return type switch
-        {
-            LicenseType.Standard => LicenseGenerator.GenerateStandardLicense("TestUser"),
-            LicenseType.Trial => LicenseGenerator.GenerateTrialLicense(TimeSpan.FromDays(7)),
-            LicenseType.NodeLocked => LicenseGenerator.GenerateNodeLockedLicense("test-hardware-id"),
-            LicenseType.Subscription => LicenseGenerator.GenerateSubscriptionLicense("TestUser", TimeSpan.FromDays(30)),
-            LicenseType.Concurrent => LicenseGenerator.GenerateConcurrentLicense("TestUser", 6),
-            LicenseType.Floating => LicenseGenerator.GenerateFloatingLicense("TestUser", 5),
-            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-        };
-    }
-
-    private void LoadSecretKeys()
-    {
-        var secretPath = Path.GetTempFileName();
-        LicenseUtils.GenerateLicensingSecrets("MySecretTestKey", secretPath, "12345678-90ab-cdef-ghij-klmnopqrst");
-        LicenseUtils.LoadLicensingSecrets("MySecretTestKey", secretPath);
-    }
-
     [Fact]
     public void SaveLicense_SavesLicenseToFileCorrectly()
     {
@@ -56,20 +36,10 @@ public class LicenseManagerTests
         var filePath = Path.GetTempFileName();
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => LicenseManager.SaveLicense<BaseLicense>(null!, filePath));
+        Assert.Throws<ArgumentNullException>(() => LicenseManager.SaveLicense<BaseLicense>(null!, null, filePath));
 
         // Clean up
         File.Delete(filePath);
-    }
-
-    [Fact]
-    public void SaveLicense_ThrowsExceptionForNullFilePath()
-    {
-        // Arrange
-        var license = GenerateLicense();
-
-        // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => LicenseManager.SaveLicense(license, null!));
     }
 
     [Fact]
@@ -80,7 +50,7 @@ public class LicenseManagerTests
         var license = GenerateLicense();
 
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => LicenseManager.SaveLicense(license, ""));
+        Assert.Throws<DirectoryNotFoundException>(() => LicenseManager.SaveLicense(license, ""));
     }
 
     [Fact]
@@ -92,7 +62,7 @@ public class LicenseManagerTests
         const string filePath = "Invalid/File/Path"; // This should be an invalid path on most systems
 
         // Act & Assert
-        Assert.Throws<ArgumentException>(() => LicenseManager.SaveLicense(license, filePath));
+        Assert.Throws<DirectoryNotFoundException>(() => LicenseManager.SaveLicense(license, filePath));
     }
 
     [Fact]
@@ -102,7 +72,15 @@ public class LicenseManagerTests
         LoadSecretKeys();
         var license = GenerateLicense();
         var filePath = Path.GetTempFileName();
-        LicenseManager.SaveLicense(license, filePath);
+        var rsa = RSA.Create();
+        var privateKey = Convert.ToBase64String(rsa.ExportRSAPrivateKey());
+        var publicKey = Convert.ToBase64String(rsa.ExportRSAPublicKey());
+        var licenseSecrets = new LicensingSecrets
+        {
+            PrivateKey = privateKey, 
+            PublicKey = publicKey
+        };
+        LicenseManager.SaveLicense(license, filePath, privateKey);
 
         // Act
         var loadedLicense = await LicenseManager.LoadLicenseAsync(filePath);
@@ -355,9 +333,35 @@ public class LicenseManagerTests
         Assert.False(isValid);
     }
 
+    #region Private
+
+    // Helper method to generate a license for testing
+    private BaseLicense GenerateLicense(LicenseType type = LicenseType.Standard)
+    {
+        return type switch
+        {
+            LicenseType.Standard => LicenseGenerator.GenerateStandardLicense("TestUser"),
+            LicenseType.Trial => LicenseGenerator.GenerateTrialLicense(TimeSpan.FromDays(7)),
+            LicenseType.NodeLocked => LicenseGenerator.GenerateNodeLockedLicense("test-hardware-id"),
+            LicenseType.Subscription => LicenseGenerator.GenerateSubscriptionLicense("TestUser", TimeSpan.FromDays(30)),
+            LicenseType.Concurrent => LicenseGenerator.GenerateConcurrentLicense("TestUser", 6),
+            LicenseType.Floating => LicenseGenerator.GenerateFloatingLicense("TestUser", 5),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+    }
+
+    private void LoadSecretKeys()
+    {
+        var secretPath = Path.GetTempFileName();
+        LicenseUtils.GenerateLicensingSecrets("MySecretTestKey", secretPath, "12345678-90ab-cdef-ghij-klmnopqrst");
+        LicenseUtils.LoadLicensingSecrets("MySecretTestKey", secretPath);
+    }
+
     private static void SetLicense(BaseLicense license)
     {
         var currentProperty = typeof(LicenseManager).GetProperty("Current", BindingFlags.Public | BindingFlags.Static);
         currentProperty!.SetValue(null, license);
     }
+    
+    #endregion
 }

@@ -114,7 +114,9 @@ public static class LicenseValidator
     public static bool ValidateFloatingLicense(byte[] licenseData, string userName, int maxActiveUsersCount)
     {
         if (!VerifyLicenseData(licenseData, out var licenseObj))
+        {
             return false;
+        }
 
         return licenseObj is FloatingLicense license &&
                license.UserName == userName &&
@@ -131,13 +133,14 @@ public static class LicenseValidator
     public static bool ValidateConcurrentLicense(byte[] licenseData, string userName, int maxActiveUsersCount)
     {
         if (!VerifyLicenseData(licenseData, out var licenseObj))
+        {
             return false;
+        }
 
         return licenseObj is ConcurrentLicense license &&
                license.UserName == userName &&
                license.MaxActiveUsersCount == maxActiveUsersCount;
     }
-
 
     /// <summary>
     ///     Verifies the license data integrity and signature.
@@ -157,7 +160,9 @@ public static class LicenseValidator
         if (!SecurityUtils.VerifySignature(hash, signature, LicenseUtils.GetLicensingSecrets().PublicKey))
         {
             if (throwOnFailure)
+            {
                 throw new InvalidLicenseSignatureException("License signature verification failed.");
+            }
 
             return false;
         }

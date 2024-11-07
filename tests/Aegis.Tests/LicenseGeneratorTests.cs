@@ -1,5 +1,6 @@
 ﻿using Aegis.Enums;
 using Aegis.Models;
+using FluentAssertions;
 
 namespace Aegis.Tests;
 
@@ -15,11 +16,13 @@ public class LicenseGeneratorTests
         var license = LicenseGenerator.GenerateStandardLicense(userName);
 
         // Assert
-        Assert.NotNull(license);
-        Assert.IsType<StandardLicense>(license);
-        Assert.Equal(userName, license.UserName);
-        Assert.Equal(LicenseType.Standard, license.Type);
-        Assert.Equal(DateTime.UtcNow.Date, license.IssuedOn.Date);
+        license.Should().NotBeNull();
+        license.Should().BeOfType<StandardLicense>();
+        license.LicenseId.Should().NotBeEmpty();
+        license.LicenseKey.Should().NotBeNullOrEmpty();
+        license.Type.Should().Be(LicenseType.Standard);
+        license.IssuedOn.Date.Should().Be(DateTime.UtcNow.Date);
+        license.UserName.Should().Be(userName);
     }
 
     [Fact]
@@ -32,12 +35,14 @@ public class LicenseGeneratorTests
         var license = LicenseGenerator.GenerateTrialLicense(trialPeriod);
 
         // Assert
-        Assert.NotNull(license);
-        Assert.IsType<TrialLicense>(license);
-        Assert.Equal(trialPeriod, license.TrialPeriod);
-        Assert.Equal(LicenseType.Trial, license.Type);
-        Assert.Equal(DateTime.UtcNow.Date, license.IssuedOn.Date);
-        Assert.Equal(DateTime.UtcNow.Add(trialPeriod).Date, license.ExpirationDate!.Value.Date);
+        license.Should().NotBeNull();
+        license.Should().BeOfType<TrialLicense>();
+        license.TrialPeriod.Should().Be(trialPeriod);
+        license.LicenseId.Should().NotBeEmpty();
+        license.LicenseKey.Should().NotBeNullOrEmpty();
+        license.Type.Should().Be(LicenseType.Trial);
+        license.IssuedOn.Date.Should().Be(DateTime.UtcNow.Date);
+        license.ExpirationDate!.Value.Date.Should().Be(DateTime.UtcNow.Add(trialPeriod).Date);
     }
 
     [Fact]
@@ -47,11 +52,13 @@ public class LicenseGeneratorTests
         var license = LicenseGenerator.GenerateNodeLockedLicense(); // No hardwareId provided
 
         // Assert
-        Assert.NotNull(license);
-        Assert.IsType<NodeLockedLicense>(license);
-        Assert.NotNull(license.HardwareId);
-        Assert.Equal(LicenseType.NodeLocked, license.Type);
-        Assert.Equal(DateTime.UtcNow.Date, license.IssuedOn.Date);
+        license.Should().NotBeNull();
+        license.Should().BeOfType<NodeLockedLicense>();
+        license.Type.Should().Be(LicenseType.NodeLocked);
+        license.LicenseId.Should().NotBeEmpty();
+        license.LicenseKey.Should().NotBeNullOrEmpty();
+        license.IssuedOn.Date.Should().Be(DateTime.UtcNow.Date);
+        license.HardwareId.Should().NotBeNullOrEmpty();
     }
 
     [Fact]
@@ -64,11 +71,13 @@ public class LicenseGeneratorTests
         var license = LicenseGenerator.GenerateNodeLockedLicense(hardwareId);
 
         // Assert
-        Assert.NotNull(license);
-        Assert.IsType<NodeLockedLicense>(license);
-        Assert.Equal(hardwareId, license.HardwareId);
-        Assert.Equal(LicenseType.NodeLocked, license.Type);
-        Assert.Equal(DateTime.UtcNow.Date, license.IssuedOn.Date);
+        license.Should().NotBeNull();
+        license.Should().BeOfType<NodeLockedLicense>();
+        license.Type.Should().Be(LicenseType.NodeLocked);
+        license.LicenseId.Should().NotBeEmpty();
+        license.LicenseKey.Should().NotBeNullOrEmpty();
+        license.IssuedOn.Date.Should().Be(DateTime.UtcNow.Date);
+        license.HardwareId.Should().Be(hardwareId);
     }
 
     [Fact]

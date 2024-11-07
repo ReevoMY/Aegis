@@ -446,17 +446,26 @@ public class LicenseService(AegisDbContext dbContext)
         var baseLicense = MapLicenseToBaseLicense(license);
         return license.Type switch
         {
-            LicenseType.Standard => LicenseManager.SaveLicense(new StandardLicense(baseLicense, license.IssuedTo)),
-            LicenseType.Trial => LicenseManager.SaveLicense(new TrialLicense(baseLicense,
+            LicenseType.Standard => LicenseManager.SaveLicense(new StandardLicense(
+                baseLicense,
+                license.IssuedTo)),
+            LicenseType.Trial => LicenseManager.SaveLicense(new TrialLicense(
+                baseLicense,
                 license.ExpirationDate!.Value - DateTime.UtcNow)),
-            LicenseType.NodeLocked => LicenseManager.SaveLicense(
-                new NodeLockedLicense(baseLicense, license.HardwareId!)),
-            LicenseType.Subscription => LicenseManager.SaveLicense(new SubscriptionLicense(baseLicense,
+            LicenseType.NodeLocked => LicenseManager.SaveLicense(new NodeLockedLicense(
+                baseLicense,
+                license.HardwareId!)),
+            LicenseType.Subscription => LicenseManager.SaveLicense(new SubscriptionLicense(
+                baseLicense,
                 license.IssuedTo,
                 license.ExpirationDate!.Value - DateTime.UtcNow)),
-            LicenseType.Floating => LicenseManager.SaveLicense(new FloatingLicense(baseLicense, license.IssuedTo,
+            LicenseType.Floating => LicenseManager.SaveLicense(new FloatingLicense(
+                baseLicense,
+                license.IssuedTo,
                 license.MaxActiveUsersCount!.Value)),
-            LicenseType.Concurrent => LicenseManager.SaveLicense(new ConcurrentLicense(baseLicense, license.IssuedTo,
+            LicenseType.Concurrent => LicenseManager.SaveLicense(new ConcurrentLicense(
+                baseLicense,
+                license.IssuedTo,
                 license.MaxActiveUsersCount!.Value)),
             _ => throw new InvalidLicenseFormatException("Invalid license type.")
         };

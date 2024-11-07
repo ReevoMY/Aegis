@@ -1,19 +1,11 @@
 ﻿using System.Security.Cryptography;
 using Aegis.Utilities;
+using FluentAssertions;
 
 namespace Aegis.Tests;
 
 public class SecurityUtilsTests
 {
-    // Helper method to generate test data
-    private static byte[] GenerateTestData(int length)
-    {
-        var data = new byte[length];
-        using var rng = RandomNumberGenerator.Create();
-        rng.GetBytes(data);
-        return data;
-    }
-
     [Fact]
     public void GenerateAesKey_ReturnsKeyOfCorrectSize()
     {
@@ -21,7 +13,7 @@ public class SecurityUtilsTests
         var key = SecurityUtils.GenerateAesKey();
 
         // Assert
-        Assert.Equal(32, key.Length); // AES-256 key size is 32 bytes
+        key.Length.Should().Be(32); // AES-256 key size is 32 bytes
     }
 
     [Fact]
@@ -36,8 +28,9 @@ public class SecurityUtilsTests
         var decryptedData = SecurityUtils.DecryptData(encryptedData, key);
 
         // Assert
-        Assert.NotEqual(testData, encryptedData);
-        Assert.Equal(testData, decryptedData);
+        encryptedData.Should().NotEqual(testData);
+        decryptedData.Should().Equal(testData);
+        decryptedData.Length.Should().Be(512);
     }
 
     [Fact]
@@ -47,7 +40,8 @@ public class SecurityUtilsTests
         var key = SecurityUtils.GenerateAesKey();
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => SecurityUtils.EncryptData(null!, key));
+        var act = () => SecurityUtils.EncryptData(null!, key);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -57,7 +51,8 @@ public class SecurityUtilsTests
         var testData = GenerateTestData(64);
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => SecurityUtils.EncryptData(testData, null!));
+        var act = () => SecurityUtils.EncryptData(testData, null!);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -67,7 +62,8 @@ public class SecurityUtilsTests
         var key = SecurityUtils.GenerateAesKey();
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => SecurityUtils.DecryptData(null!, key));
+        var act = () => SecurityUtils.DecryptData(null!, key);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -77,7 +73,8 @@ public class SecurityUtilsTests
         var testData = GenerateTestData(64);
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => SecurityUtils.DecryptData(testData, null!));
+        var act = () => SecurityUtils.DecryptData(testData, null!);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -94,7 +91,7 @@ public class SecurityUtilsTests
         var isValid = SecurityUtils.VerifySignature(testData, signature, publicKey);
 
         // Assert
-        Assert.True(isValid);
+        isValid.Should().BeTrue();
     }
 
     [Fact]
@@ -105,7 +102,8 @@ public class SecurityUtilsTests
         var privateKey = Convert.ToBase64String(rsa.ExportRSAPrivateKey());
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => SecurityUtils.SignData(null!, privateKey));
+        var act = () => SecurityUtils.SignData(null!, privateKey);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -115,7 +113,8 @@ public class SecurityUtilsTests
         var testData = GenerateTestData(256);
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => SecurityUtils.SignData(testData, null!));
+        var act = () => SecurityUtils.SignData(testData, null!);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -127,8 +126,8 @@ public class SecurityUtilsTests
         var signature = GenerateTestData(128);
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() =>
-            SecurityUtils.VerifySignature(null!, signature, publicKey));
+        var act = () => SecurityUtils.VerifySignature(null!, signature, publicKey);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -140,8 +139,8 @@ public class SecurityUtilsTests
         var testData = GenerateTestData(256);
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() =>
-            SecurityUtils.VerifySignature(testData, null!, publicKey));
+        var act = () => SecurityUtils.VerifySignature(testData, null!, publicKey);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -152,8 +151,8 @@ public class SecurityUtilsTests
         var signature = GenerateTestData(128);
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() =>
-            SecurityUtils.VerifySignature(testData, signature, null!));
+        var act = () => SecurityUtils.VerifySignature(testData, signature, null!);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -166,14 +165,17 @@ public class SecurityUtilsTests
         var checksum = SecurityUtils.CalculateChecksum(testData);
 
         // Assert
-        Assert.NotEmpty(checksum);
+        checksum.Should().NotBeNullOrEmpty();
+        var hash = Convert.FromBase64String(checksum);
+        hash.Length.Should().Be(32); // SHA256 hash size is 32 bytes
     }
 
     [Fact]
     public void CalculateChecksum_ThrowsException_ForNullData()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => SecurityUtils.CalculateChecksum(null!));
+        var act = () => SecurityUtils.CalculateChecksum(null!);
+        act.Should().Throw<ArgumentNullException>();
     }
     
     [Fact]
@@ -186,14 +188,15 @@ public class SecurityUtilsTests
         var hash = SecurityUtils.CalculateSha256Hash(testData);
 
         // Assert
-        Assert.Equal(32, hash.Length); // SHA256 hash size is 32 bytes
+        hash.Length.Should().Be(32); // SHA256 hash size is 32 bytes
     }
 
     [Fact]
     public void CalculateSha256Hash_ThrowsException_ForNullData()
     {
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => SecurityUtils.CalculateSha256Hash(null!));
+        var act = () => SecurityUtils.CalculateSha256Hash(null!);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -207,7 +210,7 @@ public class SecurityUtilsTests
         var isValid = SecurityUtils.VerifyChecksum(testData, checksum);
 
         // Assert
-        Assert.True(isValid);
+        isValid.Should().BeTrue();
     }
 
     [Fact]
@@ -221,7 +224,7 @@ public class SecurityUtilsTests
         var isValid = SecurityUtils.VerifyChecksum(testData, checksum2);
 
         // Assert
-        Assert.False(isValid);
+        isValid.Should().BeFalse();
     }
 
     [Fact]
@@ -231,7 +234,8 @@ public class SecurityUtilsTests
         var checksum = SecurityUtils.CalculateChecksum(GenerateTestData(256));
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => SecurityUtils.VerifyChecksum(null!, checksum));
+        var act = () => SecurityUtils.VerifyChecksum(null!, checksum);
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -241,6 +245,20 @@ public class SecurityUtilsTests
         var testData = GenerateTestData(256);
 
         // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => SecurityUtils.VerifyChecksum(testData, null!));
+        var act = () => SecurityUtils.VerifyChecksum(testData, null!);
+        act.Should().Throw<ArgumentNullException>();
     }
+
+    #region Private
+
+    // Helper method to generate test data
+    private static byte[] GenerateTestData(int length)
+    {
+        var data = new byte[length];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(data);
+        return data;
+    }
+
+    #endregion
 }

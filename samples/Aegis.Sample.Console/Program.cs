@@ -22,6 +22,7 @@ public static class Program
         System.Console.WriteLine("4. Subscription");
         System.Console.WriteLine("5. Floating");
         System.Console.WriteLine("6. Concurrent");
+        System.Console.WriteLine("\r\n");
 
         var choice = System.Console.ReadLine();
         BaseLicense? license;
@@ -32,7 +33,7 @@ public static class Program
             case "1":
                 LicenseGenerator.GenerateStandardLicense("TestUser")
                     .WithLicenseKey("SD2D-35G9-1502-X3DG-16VI-ELN2")
-                    .WithIssuer("Aegis Software")
+                    .WithIssuer("Manpower")
                     .WithExpiryDate(DateTime.UtcNow.AddDays(30))
                     .WithFeature("PremiumFeature", true)
                     .SaveLicense(licensePath);
