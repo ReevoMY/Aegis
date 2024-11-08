@@ -82,7 +82,9 @@ public static class LicenseValidator
     public static bool ValidateNodeLockedLicense(byte[] licenseData, string? hardwareId = null)
     {
         if (!VerifyLicenseData(licenseData, out var licenseObj))
+        {
             return false;
+        }
 
         return licenseObj is NodeLockedLicense license &&
                (!license.ExpirationDate.HasValue || !(license.ExpirationDate < DateTime.UtcNow)) &&
@@ -161,19 +163,21 @@ public static class LicenseValidator
         {
             if (throwOnFailure)
             {
+                // TODO: ILogger
                 throw new InvalidLicenseSignatureException("License signature verification failed.");
             }
 
             return false;
         }
 
-
         // Calculate the SHA256 hash of the encrypted data and compare with the provided hash
         var calculatedHash = SecurityUtils.CalculateSha256Hash(encryptedData);
         if (!hash.SequenceEqual(calculatedHash))
         {
             if (throwOnFailure)
+            {
                 throw new InvalidLicenseSignatureException("License data integrity check failed.");
+            }
 
             return false;
         }
@@ -190,35 +194,42 @@ public static class LicenseValidator
     internal static (byte[] hash, byte[] signature, byte[] encryptedData, byte[] aesKey) SplitLicenseData(
         byte[] licenseData)
     {
-        var offset = 0;
+        try
+        {
+            var offset = 0;
 
-        // Extract hash
-        var hashLength = BitConverter.ToInt32(licenseData, offset);
-        offset += 4;
-        var hash = new byte[hashLength];
-        Array.Copy(licenseData, offset, hash, 0, hashLength);
-        offset += hashLength;
+            // Extract hash
+            var hashLength = BitConverter.ToInt32(licenseData, offset);
+            offset += 4;
+            var hash = new byte[hashLength];
+            Array.Copy(licenseData, offset, hash, 0, hashLength);
+            offset += hashLength;
 
-        // Extract signature
-        var signatureLength = BitConverter.ToInt32(licenseData, offset);
-        offset += 4;
-        var signature = new byte[signatureLength];
-        Array.Copy(licenseData, offset, signature, 0, signatureLength);
-        offset += signatureLength;
+            // Extract signature
+            var signatureLength = BitConverter.ToInt32(licenseData, offset);
+            offset += 4;
+            var signature = new byte[signatureLength];
+            Array.Copy(licenseData, offset, signature, 0, signatureLength);
+            offset += signatureLength;
 
-        // Extract encrypted data
-        var encryptedDataLength = BitConverter.ToInt32(licenseData, offset);
-        offset += 4;
-        var encryptedData = new byte[encryptedDataLength];
-        Array.Copy(licenseData, offset, encryptedData, 0, encryptedDataLength);
-        offset += encryptedDataLength;
+            // Extract encrypted data
+            var encryptedDataLength = BitConverter.ToInt32(licenseData, offset);
+            offset += 4;
+            var encryptedData = new byte[encryptedDataLength];
+            Array.Copy(licenseData, offset, encryptedData, 0, encryptedDataLength);
+            offset += encryptedDataLength;
 
-        // Extract AES key
-        var aesKeyLength = BitConverter.ToInt32(licenseData, offset);
-        offset += 4;
-        var aesKey = new byte[aesKeyLength];
-        Array.Copy(licenseData, offset, aesKey, 0, aesKeyLength);
+            // Extract AES key
+            var aesKeyLength = BitConverter.ToInt32(licenseData, offset);
+            offset += 4;
+            var aesKey = new byte[aesKeyLength];
+            Array.Copy(licenseData, offset, aesKey, 0, aesKeyLength);
 
-        return (hash, signature, encryptedData, aesKey);
+            return (hash, signature, encryptedData, aesKey);
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidLicenseFormatException("Invalid license file format.");
+        }
     }
 }

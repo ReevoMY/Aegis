@@ -21,6 +21,7 @@ using Aegis.Server.Enums;
 using Aegis.Server.Exceptions;
 using Aegis.Server.Services;
 using Aegis.Utilities;
+using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -489,12 +490,13 @@ public class LicensesControllerTests
         fileMock.Setup(f => f.Length).Returns(ms.Length);
 
         // Act
-        var result =
-            await ExecuteControllerAction(() => _controller.Validate(license.LicenseKey, "{}", fileMock.Object));
+        var result = await ExecuteControllerAction(() => _controller.Validate(license.LicenseKey, "{}", fileMock.Object));
 
         // Assert
-        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.IsType<InvalidLicenseSignatureException>(badRequestResult.Value);
+        var badRequestResult = result as BadRequestObjectResult;
+        badRequestResult.Should().NotBeNull();
+        badRequestResult!.Value.Should().BeOfType<InvalidLicenseFormatException>();
+
     }
 
     [Fact]

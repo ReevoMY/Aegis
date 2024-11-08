@@ -8,6 +8,7 @@ using Aegis.Server.Enums;
 using Aegis.Server.Exceptions;
 using Aegis.Server.Services;
 using Aegis.Utilities;
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Aegis.Server.Tests.Services;
@@ -280,9 +281,9 @@ public class LicenseServiceTests
         var result = await _licenseService.ValidateLicenseAsync(license.LicenseKey, licenseFile);
 
         // Assert
-        Assert.False(result.IsValid);
-        Assert.Null(result.License);
-        Assert.IsType<InvalidLicenseSignatureException>(result.Exception);
+        result.IsValid.Should().BeFalse();
+        result.License.Should().BeNull();
+        result.Exception.Should().BeOfType<InvalidLicenseFormatException>();
     }
 
     [Fact]

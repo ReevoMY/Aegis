@@ -6,43 +6,6 @@ namespace Aegis.Tests;
 
 public class LicenseValidatorTests
 {
-    private void LoadSecretKeys()
-    {
-        var secretPath = Path.GetTempFileName();
-        LicenseUtils.GenerateLicensingSecrets("MySecretTestKey", secretPath, "12345678-90ab-cdef-ghij-klmnopqrst");
-        LicenseUtils.LoadLicensingSecrets("MySecretTestKey", secretPath);
-    }
-
-
-    // Helper methods to generate various licenses
-    private StandardLicense GenerateStandardLicense()
-    {
-        return (StandardLicense)new StandardLicense("TestUser")
-            .WithLicenseKey("SD2D-35G9-1502-X3DG-16VI-ELN2")
-            .WithIssuer("Aegis Software")
-            .WithExpiryDate(DateTime.UtcNow.AddDays(30));
-    }
-
-    private TrialLicense GenerateTrialLicense(TimeSpan trialPeriod)
-    {
-        return new TrialLicense(trialPeriod);
-    }
-
-    private NodeLockedLicense GenerateNodeLockedLicense(string hardwareId)
-    {
-        return new NodeLockedLicense(hardwareId);
-    }
-
-    private SubscriptionLicense GenerateSubscriptionLicense()
-    {
-        return new SubscriptionLicense("TestUser", TimeSpan.FromDays(365));
-    }
-
-    private FloatingLicense GenerateFloatingLicense()
-    {
-        return new FloatingLicense("TestUser", 10);
-    }
-
     [Fact]
     public void ValidateStandardLicense_ReturnsTrue_ForValidLicense()
     {
@@ -318,4 +281,45 @@ public class LicenseValidatorTests
         // Assert
         Assert.False(isValid);
     }
+
+    #region Private
+
+    private void LoadSecretKeys()
+    {
+        var secretPath = Path.GetTempFileName();
+        LicenseUtils.GenerateLicensingSecrets("MySecretTestKey", secretPath, "12345678-90ab-cdef-ghij-klmnopqrst");
+        LicenseUtils.LoadLicensingSecrets("MySecretTestKey", secretPath);
+    }
+
+    // Helper methods to generate various licenses
+    private StandardLicense GenerateStandardLicense()
+    {
+        return (StandardLicense)new StandardLicense("TestUser")
+            .WithLicenseKey("SD2D-35G9-1502-X3DG-16VI-ELN2")
+            .WithIssuer("Aegis Software")
+            .WithExpiryDate(DateTime.UtcNow.AddDays(30));
+    }
+
+    private TrialLicense GenerateTrialLicense(TimeSpan trialPeriod)
+    {
+        return new TrialLicense(trialPeriod);
+    }
+
+    private NodeLockedLicense GenerateNodeLockedLicense(string hardwareId)
+    {
+        return new NodeLockedLicense(hardwareId);
+    }
+
+    private SubscriptionLicense GenerateSubscriptionLicense()
+    {
+        return new SubscriptionLicense("TestUser", TimeSpan.FromDays(365));
+    }
+
+    private FloatingLicense GenerateFloatingLicense()
+    {
+        return new FloatingLicense("TestUser", 10);
+    }
+
+    #endregion
+
 }

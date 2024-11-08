@@ -1,21 +1,42 @@
 ﻿using System.Reflection;
-using System.Security.Cryptography;
 using System.Text.Json;
 using Aegis.Enums;
 using Aegis.Exceptions;
 using Aegis.Models;
 using Aegis.Models.Utils;
 using Aegis.Utilities;
+using FluentAssertions;
+using Microsoft.Extensions.Configuration;
 
 namespace Aegis.Tests;
 
 public class LicenseManagerTests
 {
+    #region Fields
+
+    private readonly LicensingSecrets _licenseKeys;
+
+    #endregion
+
+    public LicenseManagerTests()
+    {
+        var configuration = new ConfigurationBuilder()
+            .AddUserSecrets(GetType().Assembly)
+            .Build();
+        _licenseKeys = new LicensingSecrets()
+        {
+            PublicKey = configuration.GetSection("LicensingSecrets:PublicKey").Value!,
+            PrivateKey = configuration.GetSection("LicensingSecrets:PrivateKey").Value!,
+            ApiKey = configuration.GetSection("LicensingSecrets:ApiKey").Value!
+        };
+    }
+
+    #region SaveLicense
+
     [Fact]
     public void SaveLicense_SavesLicenseToFileCorrectly()
     {
         // Arrange
-        LoadSecretKeys();
         var license = GenerateLicense();
         var filePath = Path.GetTempFileName(); // Use a temporary file
 
@@ -23,7 +44,7 @@ public class LicenseManagerTests
         LicenseManager.SaveLicense(license, filePath);
 
         // Assert
-        Assert.True(File.Exists(filePath));
+        File.Exists(filePath).Should().BeTrue();
 
         // Clean up
         File.Delete(filePath);
@@ -35,8 +56,11 @@ public class LicenseManagerTests
         // Arrange
         var filePath = Path.GetTempFileName();
 
-        // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => LicenseManager.SaveLicense<BaseLicense>(null!, null, filePath));
+        // Act
+        var act = () => LicenseManager.SaveLicense<BaseLicense>(null!, null, filePath);
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>();
 
         // Clean up
         File.Delete(filePath);
@@ -46,52 +70,54 @@ public class LicenseManagerTests
     public void SaveLicense_ThrowsExceptionForEmptyFilePath()
     {
         // Arrange
-        LoadSecretKeys();
         var license = GenerateLicense();
 
-        // Act & Assert
-        Assert.Throws<DirectoryNotFoundException>(() => LicenseManager.SaveLicense(license, ""));
+        // Act
+        var act = () => LicenseManager.SaveLicense(license, "");
+
+        // Assert
+        act.Should().Throw<DirectoryNotFoundException>();
     }
 
     [Fact]
     public void SaveLicense_ThrowsExceptionForInvalidFilePath()
     {
         // Arrange
-        LoadSecretKeys();
         var license = GenerateLicense();
         const string filePath = "Invalid/File/Path"; // This should be an invalid path on most systems
 
-        // Act & Assert
-        Assert.Throws<DirectoryNotFoundException>(() => LicenseManager.SaveLicense(license, filePath));
+        // Act
+        var act = () => LicenseManager.SaveLicense(license, filePath);
+
+        // Assert
+        act.Should().Throw<DirectoryNotFoundException>();
     }
+
+    #endregion
+
+    #region LoadLicenseAsync
 
     [Fact]
     public async Task LoadLicenseAsync_LoadsLicenseFromFileCorrectly()
     {
-        // Arrange
-        LoadSecretKeys();
-        var license = GenerateLicense();
-        var filePath = Path.GetTempFileName();
-        var rsa = RSA.Create();
-        var privateKey = Convert.ToBase64String(rsa.ExportRSAPrivateKey());
-        var publicKey = Convert.ToBase64String(rsa.ExportRSAPublicKey());
-        var licenseSecrets = new LicensingSecrets
+        foreach (var licenseType in EnumsNET.Enums.GetValues<LicenseType>())
         {
-            PrivateKey = privateKey, 
-            PublicKey = publicKey
-        };
-        LicenseManager.SaveLicense(license, filePath, privateKey);
+            // Arrange
+            var license = GenerateLicense(licenseType);
+            var filePath = Path.GetTempFileName();
+            LicenseManager.SaveLicense(license, filePath, _licenseKeys.PrivateKey);
 
-        // Act
-        var loadedLicense = await LicenseManager.LoadLicenseAsync(filePath);
+            // Act
+            var loadedLicense = await LicenseManager.LoadLicenseAsync(filePath);
 
-        // Assert
-        Assert.NotNull(loadedLicense);
-        Assert.Equal(license.LicenseKey, loadedLicense.LicenseKey);
-        Assert.Equal(license.Type, loadedLicense.Type);
+            // Assert
+            loadedLicense.Should().NotBeNull();
+            loadedLicense!.LicenseKey.Should().Be(license.LicenseKey);
+            loadedLicense.Type.Should().Be(license.Type);
 
-        // Clean up
-        File.Delete(filePath);
+            // Clean up
+            File.Delete(filePath);
+        }
     }
 
     [Fact]
@@ -101,9 +127,12 @@ public class LicenseManagerTests
         var filePath = Path.GetTempFileName();
         await File.WriteAllTextAsync(filePath, "Invalid License Data"); // Corrupt the file
 
-        // Act & Assert
-        await Assert.ThrowsAnyAsync<Exception>(async () =>
-            await LicenseManager.LoadLicenseAsync(filePath));
+        // Act
+        var act = async () => await LicenseManager.LoadLicenseAsync(filePath);
+
+        // Assert
+        await act.Should().ThrowAsync<InvalidLicenseFormatException>()
+            .WithMessage("Invalid license file format.");
 
         // Clean up
         File.Delete(filePath);
@@ -112,17 +141,21 @@ public class LicenseManagerTests
     [Fact]
     public async Task LoadLicenseAsync_ThrowsExceptionForNullFilePath()
     {
-        // Act & Assert
-        await Assert.ThrowsAsync<ArgumentNullException>(async () =>
-            await LicenseManager.LoadLicenseAsync(null!, ValidationMode.Offline));
+        // Act
+        var act = async () => await LicenseManager.LoadLicenseAsync(null!, ValidationMode.Offline);
+
+        // Assert
+        await act.Should().ThrowAsync<ArgumentNullException>();
     }
 
     [Fact]
     public async Task LoadLicenseAsync_ThrowsExceptionForEmptyFilePath()
     {
-        // Act & Assert
-        await Assert.ThrowsAsync<ArgumentException>(async () =>
-            await LicenseManager.LoadLicenseAsync(""));
+        // Act
+        var act = async () => await LicenseManager.LoadLicenseAsync("");
+
+        // Assert
+        await act.Should().ThrowAsync<ArgumentException>();
     }
 
     [Fact]
@@ -131,26 +164,34 @@ public class LicenseManagerTests
         // Arrange
         const string filePath = "Invalid/File/Path"; // This should be an invalid path
 
-        // Act & Assert
-        await Assert.ThrowsAsync<DirectoryNotFoundException>(async () =>
-            await LicenseManager.LoadLicenseAsync(filePath));
+        // Act
+        var act = async () => await LicenseManager.LoadLicenseAsync(filePath);
+
+        // Assert
+        await act.Should().ThrowAsync<DirectoryNotFoundException>();
     }
 
-    // IsFeatureEnabled Tests
+    #endregion
+
+    #region IsFeatureEnabled
 
     [Fact]
     public void IsFeatureEnabled_ReturnsCorrectValue()
     {
-        // Arrange
-        var license = GenerateLicense();
-        license.Features.Add("Feature1", true);
-        SetLicense(license);
+        foreach (var licenseType in EnumsNET.Enums.GetValues<LicenseType>())
+        {
 
-        // Act
-        var isEnabled = LicenseManager.IsFeatureEnabled("Feature1");
+            // Arrange
+            var license = GenerateLicense(licenseType);
+            license.Features.Add("Feature1", true);
+            SetLicense(license);
 
-        // Assert
-        Assert.True(isEnabled);
+            // Act
+            var isEnabled = LicenseManager.IsFeatureEnabled("Feature1");
+
+            // Assert
+            isEnabled.Should().BeTrue();
+        }
     }
 
     [Fact]
@@ -164,7 +205,7 @@ public class LicenseManagerTests
         var isEnabled = LicenseManager.IsFeatureEnabled("NonExistingFeature");
 
         // Assert
-        Assert.False(isEnabled);
+        isEnabled.Should().BeFalse();
     }
 
     [Fact]
@@ -179,8 +220,12 @@ public class LicenseManagerTests
         var isEnabled = LicenseManager.IsFeatureEnabled("Feature1");
 
         // Assert
-        Assert.False(isEnabled);
+        isEnabled.Should().BeFalse();
     }
+
+    #endregion
+
+    #region ThrowIfNotAllowed
 
     [Fact]
     public void ThrowIfNotAllowed_ThrowsExceptionForDisabledFeature()
@@ -190,8 +235,11 @@ public class LicenseManagerTests
         license.Features.Add("Feature1", false);
         SetLicense(license);
 
-        // Act & Assert
-        Assert.Throws<FeatureNotLicensedException>(() => LicenseManager.ThrowIfNotAllowed("Feature1"));
+        // Act
+        var act = () => LicenseManager.ThrowIfNotAllowed("Feature1");
+
+        // Assert
+        act.Should().Throw<FeatureNotLicensedException>();
     }
 
     [Fact]
@@ -206,39 +254,50 @@ public class LicenseManagerTests
         LicenseManager.ThrowIfNotAllowed("Feature1");
     }
 
-    // SetServerBaseEndpoint Tests
+    #endregion
 
-    [Fact]
-    public void SetServerBaseEndpoint_SetsEndpointCorrectly()
+    #region SetServerBaseEndpoint
+
+    [Theory]
+    [InlineData("https://api-endpoint.com")]
+    [InlineData("https://api-endpoint.com/")]
+    public void SetServerBaseEndpoint_SetsEndpointCorrectly(string newEndpoint)
     {
         // Arrange
-        const string newEndpoint = "https://new-api-endpoint.com";
+        var expectedEndpoint = newEndpoint.EndsWith("/") ? newEndpoint[..^1] : newEndpoint; // Remove trailing slash
 
         // Act
         LicenseManager.SetServerBaseEndpoint(newEndpoint);
 
         // Assert
-        var serverBaseEndpointField = typeof(LicenseManager).GetField("_serverBaseEndpoint",
-            BindingFlags.NonPublic | BindingFlags.Static);
+        var serverBaseEndpointField = typeof(LicenseManager).GetField("_serverBaseEndpoint", BindingFlags.NonPublic | BindingFlags.Static);
         var serverBaseEndpointValue = serverBaseEndpointField!.GetValue(null);
-        Assert.Equal(newEndpoint, serverBaseEndpointValue);
+        serverBaseEndpointValue.Should().Be(expectedEndpoint);
     }
 
     [Fact]
     public void SetServerBaseEndpoint_ThrowsExceptionForNullEndpoint()
     {
-        // Act & Assert
-        Assert.Throws<ArgumentNullException>(() => LicenseManager.SetServerBaseEndpoint(null!));
+        // Act
+        var act = () => LicenseManager.SetServerBaseEndpoint(null!);
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
     public void SetServerBaseEndpoint_ThrowsExceptionForEmptyEndpoint()
     {
-        // Act & Assert
-        Assert.Throws<ArgumentException>(() => LicenseManager.SetServerBaseEndpoint(""));
+        // Act
+        var act = () => LicenseManager.SetServerBaseEndpoint("");
+
+        // Assert
+        act.Should().Throw<ArgumentException>();
     }
 
-    // SetHeartbeatInterval Tests
+    #endregion
+
+    #region SetHeartbeatInterval
 
     [Fact]
     public void SetHeartbeatInterval_SetsIntervalCorrectly()
@@ -253,17 +312,22 @@ public class LicenseManagerTests
         var heartbeatIntervalField = typeof(LicenseManager).GetField("_heartbeatInterval",
             BindingFlags.NonPublic | BindingFlags.Static);
         var heartbeatIntervalValue = heartbeatIntervalField!.GetValue(null);
-        Assert.Equal(newInterval, heartbeatIntervalValue);
+        heartbeatIntervalValue.Should().Be(newInterval);
     }
 
     [Fact]
     public void SetHeartbeatInterval_ThrowsExceptionForNegativeInterval()
     {
-        // Act & Assert
-        Assert.Throws<ArgumentOutOfRangeException>(() => LicenseManager.SetHeartbeatInterval(TimeSpan.FromMinutes(-1)));
+        // Act
+        var act = () => LicenseManager.SetHeartbeatInterval(TimeSpan.FromMinutes(-1));
+
+        // Assert
+        act.Should().Throw<ArgumentOutOfRangeException>();
     }
 
-    // CalculateChecksum Tests
+    #endregion
+
+    #region VerifyChecksum
 
     [Fact]
     public void VerifyChecksum_ReturnsTrueForMatchingChecksum()
@@ -277,7 +341,7 @@ public class LicenseManagerTests
         var isValid = SecurityUtils.VerifyChecksum(licenseData, checksum);
 
         // Assert
-        Assert.True(isValid);
+        isValid.Should().BeTrue();
     }
 
     [Fact]
@@ -292,10 +356,12 @@ public class LicenseManagerTests
         var isValid = SecurityUtils.VerifyChecksum(licenseData, incorrectChecksum);
 
         // Assert
-        Assert.False(isValid);
+        isValid.Should().BeFalse();
     }
 
-    // Signature Verification Tests
+    #endregion
+
+    #region VerifySignature
 
     [Fact]
     public void VerifySignature_ReturnsTrueForValidSignature()
@@ -311,7 +377,7 @@ public class LicenseManagerTests
         var isValid = SecurityUtils.VerifySignature(hash, signature, publicKey); // Verify signature of hash
 
         // Assert
-        Assert.True(isValid);
+        isValid.Should().BeTrue();
     }
 
     [Fact]
@@ -330,8 +396,10 @@ public class LicenseManagerTests
         var isValid = SecurityUtils.VerifySignature(hash, invalidSignature, publicKey);
 
         // Assert
-        Assert.False(isValid);
+        isValid.Should().BeFalse();
     }
+
+    #endregion
 
     #region Private
 
@@ -342,7 +410,7 @@ public class LicenseManagerTests
         {
             LicenseType.Standard => LicenseGenerator.GenerateStandardLicense("TestUser"),
             LicenseType.Trial => LicenseGenerator.GenerateTrialLicense(TimeSpan.FromDays(7)),
-            LicenseType.NodeLocked => LicenseGenerator.GenerateNodeLockedLicense("test-hardware-id"),
+            LicenseType.NodeLocked => LicenseGenerator.GenerateNodeLockedLicense(HardwareUtils.GetHardwareId()),
             LicenseType.Subscription => LicenseGenerator.GenerateSubscriptionLicense("TestUser", TimeSpan.FromDays(30)),
             LicenseType.Concurrent => LicenseGenerator.GenerateConcurrentLicense("TestUser", 6),
             LicenseType.Floating => LicenseGenerator.GenerateFloatingLicense("TestUser", 5),

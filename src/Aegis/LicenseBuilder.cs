@@ -15,7 +15,9 @@ public static class LicenseBuilder
     public static BaseLicense WithExpiryDate(this BaseLicense baseLicense, DateTime? expiryDate)
     {
         if (baseLicense is TrialLicense)
+        {
             throw new LicenseGenerationException("Trial licenses have a predefined expiry date.");
+        }
 
         baseLicense.ExpirationDate = expiryDate;
         return baseLicense;

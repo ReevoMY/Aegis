@@ -14,6 +14,8 @@ namespace Aegis;
 
 public static class LicenseManager
 {
+    #region Fields
+
     // Validation Endpoint
     private static readonly HttpClient HttpClient = new();
     private static string _serverBaseEndpoint = "https://your-api-url/api/licenses";
@@ -22,7 +24,14 @@ public static class LicenseManager
     private static readonly string DisconnectEndpoint = $"{_serverBaseEndpoint}/disconnect";
     private static TimeSpan _heartbeatInterval = TimeSpan.FromMinutes(5); // Should be less than server timeout
     private static Timer? _heartbeatTimer;
+
+    #endregion
+
     public static BaseLicense? Current { get; private set; }
+
+    #region Methods
+
+    #region Public
 
     /// <summary>
     ///     Sets the base endpoint for the licensing server.
@@ -41,7 +50,9 @@ public static class LicenseManager
         }
 
         if (serverBaseEndpoint.EndsWith('/'))
+        {
             serverBaseEndpoint = serverBaseEndpoint[..^1];
+        }
         _serverBaseEndpoint = serverBaseEndpoint;
     }
 
@@ -67,7 +78,7 @@ public static class LicenseManager
     /// <param name="privateKey">The private key for signing.</param>
     /// <returns>A byte array containing the encrypted and signed license data.</returns>
     /// <exception cref="ArgumentNullException">Thrown if the license is null.</exception>
-    public static byte[] SaveLicense<T>(T license, string? filePath = null, string ? privateKey = null) where T : BaseLicense
+    public static byte[] SaveLicense<T>(T license, string? filePath = null, string? privateKey = null) where T : BaseLicense
     {
         Guard.Against.Null(license);
 
@@ -98,7 +109,8 @@ public static class LicenseManager
     /// <exception cref="InvalidLicenseSignatureException">Thrown if the license signature is invalid.</exception>
     /// <exception cref="InvalidLicenseFormatException">Thrown if the license file format is invalid.</exception>
     /// <exception cref="LicenseValidationException">Thrown if the license validation fails.</exception>
-    public static async Task<BaseLicense?> LoadLicenseAsync(string filePath,
+    public static async Task<BaseLicense?> LoadLicenseAsync(
+        string filePath,
         ValidationMode validationMode = ValidationMode.Offline)
     {
         // Read the combined data from the file
@@ -120,10 +132,12 @@ public static class LicenseManager
     /// <exception cref="InvalidLicenseSignatureException">Thrown if the license signature is invalid.</exception>
     /// <exception cref="InvalidLicenseFormatException">Thrown if the license file format is invalid.</exception>
     /// <exception cref="LicenseValidationException">Thrown if the license validation fails.</exception>
-    public static async Task<BaseLicense?> LoadLicenseAsync(byte[] licenseData,
-        ValidationMode validationMode = ValidationMode.Offline, Dictionary<string, string?>? validationParams = null)
+    public static async Task<BaseLicense?> LoadLicenseAsync(
+        byte[] licenseData,
+        ValidationMode validationMode = ValidationMode.Offline,
+        Dictionary<string, string?>? validationParams = null)
     {
-        if (!LicenseValidator.VerifyLicenseData(licenseData, out var license, true) || license == null)
+        if (!LicenseValidator.VerifyLicenseData(licenseData, out var license) || license == null)
         {
             throw new InvalidLicenseFormatException("Invalid license file format.");
         }
@@ -141,8 +155,7 @@ public static class LicenseManager
         };
 
         // Validate the license, VerifyLicenseData will be called again, but it's mandatory to keep LicenseValidator independent.
-        await ValidateLicenseAsync(license!, licenseData, validationMode,
-            validationParams ?? GetValidationParams(license!)!);
+        await ValidateLicenseAsync(license!, licenseData, validationMode, validationParams ?? GetValidationParams(license!)!);
 
         return license;
     }
@@ -154,7 +167,10 @@ public static class LicenseManager
     /// <returns>True if the feature is enabled, false otherwise.</returns>
     public static bool IsFeatureEnabled(string featureName)
     {
-        return Current != null && Current.Features.ContainsKey(featureName) && Current.Features[featureName];
+        Guard.Against.NullOrEmpty(featureName);
+        Guard.Against.Null(Current, exceptionCreator: () => new InvalidLicenseFormatException("Invalid license file format."));
+
+        return Current.Features.ContainsKey(featureName) && Current.Features[featureName];
     }
 
     /// <summary>
@@ -186,7 +202,9 @@ public static class LicenseManager
         Current = null;
     }
 
-    // Helper methods
+    #endregion
+
+    #region Private
 
     /// <summary>
     ///     Validates the license asynchronously.
@@ -211,7 +229,9 @@ public static class LicenseManager
         }
 
         if (license.Type == LicenseType.Concurrent)
+        {
             _heartbeatTimer ??= new Timer(state => { _ = SendHeartbeat(); }, null, TimeSpan.Zero, _heartbeatInterval);
+        }
     }
 
     /// <summary>
@@ -237,8 +257,10 @@ public static class LicenseManager
 
         var response = await HttpClient.PostAsync(ValidationEndpoint, formData);
         if (!response.IsSuccessStatusCode)
+        {
             throw new LicenseValidationException(
                 $"Online validation failed: {response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
+        }
     }
 
     /// <summary>
@@ -253,24 +275,32 @@ public static class LicenseManager
     {
         var isLicenseValid = license.Type switch
         {
-            LicenseType.Standard => LicenseValidator.ValidateStandardLicense(licenseData,
+            LicenseType.Standard => LicenseValidator.ValidateStandardLicense(
+                licenseData,
                 validationParams?["UserName"]!, validationParams?["SerialNumber"]!),
             LicenseType.Trial => LicenseValidator.ValidateTrialLicense(licenseData),
-            LicenseType.NodeLocked => LicenseValidator.ValidateNodeLockedLicense(licenseData,
+            LicenseType.NodeLocked => LicenseValidator.ValidateNodeLockedLicense(
+                licenseData,
                 validationParams?["HardwareId"]),
             LicenseType.Subscription => LicenseValidator.ValidateSubscriptionLicense(licenseData),
-            LicenseType.Floating => LicenseValidator.ValidateFloatingLicense(licenseData,
+            LicenseType.Floating => LicenseValidator.ValidateFloatingLicense(
+                licenseData,
                 validationParams?["UserName"]!, int.Parse(validationParams?["MaxActiveUsersCount"]!)),
-            LicenseType.Concurrent => LicenseValidator.ValidateConcurrentLicense(licenseData,
+            LicenseType.Concurrent => LicenseValidator.ValidateConcurrentLicense(
+                licenseData,
                 validationParams?["UserName"]!, int.Parse(validationParams?["MaxActiveUsersCount"]!)),
             _ => false
         };
 
         if (isLicenseValid)
+        {
             isLicenseValid = LicenseValidator.ValidateLicenseRules(license, validationParams);
+        }
 
         if (!isLicenseValid)
+        {
             throw new LicenseValidationException("License validation failed.");
+        }
     }
 
     /// <summary>
@@ -279,7 +309,8 @@ public static class LicenseManager
     /// <param name="license">The license object.</param>
     /// <param name="validationParams">Optional validation parameters.</param>
     /// <returns>A dictionary of validation parameters.</returns>
-    private static Dictionary<string, string> GetValidationParams(BaseLicense? license,
+    private static Dictionary<string, string> GetValidationParams(
+        BaseLicense? license,
         Dictionary<string, string?>? validationParams = null)
     {
         return license switch
@@ -290,7 +321,9 @@ public static class LicenseManager
                 { "SerialNumber", validationParams?["SerialNumber"] ?? standardLicense.LicenseKey }
             },
             NodeLockedLicense nodeLockedLicense => new Dictionary<string, string>
-                { { "HardwareId", validationParams?["HardwareId"] ?? nodeLockedLicense.HardwareId } },
+            {
+                { "HardwareId", validationParams?["HardwareId"] ?? nodeLockedLicense.HardwareId }
+            },
             SubscriptionLicense subscriptionLicense => new Dictionary<string, string>
             {
                 { "UserName", subscriptionLicense.UserName },
@@ -328,9 +361,12 @@ public static class LicenseManager
         HttpClient.DefaultRequestHeaders.Authorization =
             new AuthenticationHeaderValue("X-API-KEY", LicenseUtils.GetLicensingSecrets().ApiKey);
         var response = await HttpClient.PostAsync(HeartbeatEndpoint, null);
+        
         if (!response.IsSuccessStatusCode)
+        {
             throw new HeartbeatException(
                 $"Heartbeat failed: {response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
+        }
     }
 
     /// <summary>
@@ -388,4 +424,8 @@ public static class LicenseManager
 
         return combinedData;
     }
+
+    #endregion
+
+    #endregion
 }

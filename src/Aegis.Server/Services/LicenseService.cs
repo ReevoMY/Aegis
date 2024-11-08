@@ -56,7 +56,9 @@ public class LicenseService(AegisDbContext dbContext)
             .FirstOrDefaultAsync(l => l.LicenseKey == licenseKey);
 
         if (license == null)
+        {
             return new LicenseValidationResult(false, null, new NotFoundException("License not found."));
+        }
 
         if ((license.ExpirationDate.HasValue && license.ExpirationDate.Value < DateTime.UtcNow) ||
             license.Status == LicenseStatus.Expired)
@@ -68,7 +70,9 @@ public class LicenseService(AegisDbContext dbContext)
         }
 
         if (license.Status == LicenseStatus.Revoked)
+        {
             return new LicenseValidationResult(false, null, new LicenseValidationException("License Revoked."));
+        }
 
         if (licenseFile != null)
         {
@@ -76,8 +80,7 @@ public class LicenseService(AegisDbContext dbContext)
 
             try
             {
-                loadedLicense =
-                    await LicenseManager.LoadLicenseAsync(licenseFile, ValidationMode.Offline, validationParams);
+                loadedLicense = await LicenseManager.LoadLicenseAsync(licenseFile, ValidationMode.Offline, validationParams);
             }
             catch (Exception e)
             {
