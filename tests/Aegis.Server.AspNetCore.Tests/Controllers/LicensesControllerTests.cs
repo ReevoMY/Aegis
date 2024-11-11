@@ -34,12 +34,16 @@ namespace Aegis.Server.AspNetCore.Tests.Controllers;
 
 public class LicensesControllerTests
 {
+    #region Fields
+
     private readonly AuthService _authService;
     private readonly LicensesController _controller;
     private readonly ApplicationDbContext _dbContext;
     private readonly HttpContext _httpContext;
     private readonly IOptions<JwtSettings> _jwtSettings;
     private readonly LicenseService _licenseService;
+
+    #endregion
 
     // Constructor to set up the test environment
     public LicensesControllerTests()
@@ -82,6 +86,908 @@ public class LicensesControllerTests
         LoadSecretKeys();
     }
 
+    #region Generate
+
+    [Fact]
+    public async Task Generate_ValidRequestWithAdminRole_ReturnsOkResultWithLicense()
+    {
+        // Arrange
+        SetupUser("Admin"); // Set up user with Admin role
+        var productId = _dbContext.Products.First().ProductId;
+        var featureId = _dbContext.Features.First().FeatureId;
+        var request = new LicenseGenerationRequest
+        {
+            LicenseType = LicenseType.Standard,
+            ExpirationDate = DateTime.UtcNow.AddDays(30),
+            ProductId = productId,
+            IssuedTo = "Test User",
+            FeatureIds = [featureId]
+        };
+
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Generate(request));
+
+        // Assert
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        var license = okResult.Value.Should().BeOfType<byte[]>().Subject;
+        license.Should().NotBeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task Generate_ValidRequestWithUserRole_ReturnsUnauthorized()
+    {
+        // Arrange
+        SetupUser();
+        var productId = _dbContext.Products.First().ProductId;
+        var featureId = _dbContext.Features.First().FeatureId;
+        var request = new LicenseGenerationRequest
+        {
+            LicenseType = LicenseType.Standard,
+            ExpirationDate = DateTime.UtcNow.AddDays(30),
+            ProductId = productId,
+            IssuedTo = "Test User",
+            FeatureIds = [featureId]
+        };
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Generate(request));
+
+        // Assert
+        result.Should().BeOfType<UnauthorizedObjectResult>();
+    }
+
+    [Fact]
+    public async Task Generate_InvalidProductId_ThrowsNotFoundException()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var request = new LicenseGenerationRequest
+        {
+            LicenseType = LicenseType.Standard,
+            ExpirationDate = DateTime.UtcNow.AddDays(30),
+            ProductId = Guid.NewGuid(), // Invalid ProductId
+            IssuedTo = "Test User"
+        };
+
+        // Act
+        var act = async () => await ExecuteControllerAction(() => _controller.Generate(request));
+
+        // Assert
+        await act.Should().ThrowAsync<NotFoundException>();
+    }
+
+    [Fact]
+    public async Task Generate_InvalidFeatureIds_ThrowsNotFoundException()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var productId = _dbContext.Products.First().ProductId;
+        var request = new LicenseGenerationRequest
+        {
+            LicenseType = LicenseType.Standard,
+            ExpirationDate = DateTime.UtcNow.AddDays(30),
+            ProductId = productId,
+            IssuedTo = "Test User",
+            FeatureIds = [Guid.NewGuid()] // Invalid FeatureId
+        };
+
+        // Act
+        var act = async () => await ExecuteControllerAction(() => _controller.Generate(request));
+
+        // Assert
+        await act.Should().ThrowAsync<NotFoundException>();
+    }
+
+    [Fact]
+    public async Task Generate_ExpirationDateInThePast_ThrowsBadRequestException()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var productId = _dbContext.Products.First().ProductId;
+        var request = new LicenseGenerationRequest
+        {
+            LicenseType = LicenseType.Standard,
+            ExpirationDate = DateTime.UtcNow.AddDays(-30), // Past Expiration Date
+            ProductId = productId,
+            IssuedTo = "Test User"
+        };
+
+        // Act
+        var act = async () => await ExecuteControllerAction(() => _controller.Generate(request));
+
+        // Assert
+        await act.Should().ThrowAsync<BadRequestException>();
+    }
+
+    #endregion
+
+    #region Validate Tests
+
+    [Fact]
+    public async Task Validate_ValidLicenseWithAdminRole_ReturnsOkResult()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var license = CreateAndSaveLicense(LicenseType.Standard);
+        var licenseFile = GenerateLicenseFile(license);
+        var validationParams = JsonSerializer.Serialize(new Dictionary<string, string>
+        {
+            { "UserName", license.IssuedTo },
+            { "SerialNumber", license.LicenseKey }
+        });
+
+        // Create a mock IFormFile
+        var fileMock = new Mock<IFormFile>();
+        const string fileName = "license.lic";
+        var ms = new MemoryStream(licenseFile);
+        fileMock.Setup(f => f.OpenReadStream()).Returns(ms);
+        fileMock.Setup(f => f.FileName).Returns(fileName);
+        fileMock.Setup(f => f.Length).Returns(ms.Length);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Validate(license.LicenseKey, validationParams, fileMock.Object));
+
+        // Assert
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        okResult.Value.Should().Be("License is valid");
+    }
+
+    [Fact]
+    public async Task Validate_ValidLicenseWithUserRole_ReturnsOkResult()
+    {
+        // Arrange
+        SetupUser();
+        var license = CreateAndSaveLicense(LicenseType.Standard);
+        var licenseFile = GenerateLicenseFile(license);
+        var validationParams = JsonSerializer.Serialize(new Dictionary<string, string>
+        {
+            { "UserName", license.IssuedTo },
+            { "SerialNumber", license.LicenseKey }
+        });
+
+        // Create a mock IFormFile
+        var fileMock = new Mock<IFormFile>();
+        const string fileName = "license.lic";
+        var ms = new MemoryStream(licenseFile);
+        fileMock.Setup(f => f.OpenReadStream()).Returns(ms);
+        fileMock.Setup(f => f.FileName).Returns(fileName);
+        fileMock.Setup(f => f.Length).Returns(ms.Length);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Validate(license.LicenseKey, validationParams, fileMock.Object));
+
+        // Assert
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        okResult.Value.Should().Be("License is valid");
+    }
+
+    [Fact]
+    public async Task Validate_MissingLicenseKey_ReturnsBadRequest()
+    {
+        // Arrange
+        SetupUser("Admin");
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Validate(string.Empty, "{}", null!));
+
+        // Assert
+        var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        badRequestResult.Value.Should().Be("License key is required.");
+    }
+
+    [Fact]
+    public async Task Validate_MissingLicenseFile_ReturnsBadRequest()
+    {
+        // Arrange
+        SetupUser("Admin");
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Validate("some-license-key", "{}", null!));
+
+        // Assert
+        var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        badRequestResult.Value.Should().Be("License file is required.");
+    }
+
+    [Fact]
+    public async Task Validate_InvalidLicenseFormat_ReturnsBadRequest()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var licenseFile = "Invalid License Data"u8.ToArray();
+
+        // Create a mock IFormFile
+        var fileMock = new Mock<IFormFile>();
+        const string fileName = "license.lic";
+        var ms = new MemoryStream(licenseFile);
+        fileMock.Setup(f => f.OpenReadStream()).Returns(ms);
+        fileMock.Setup(f => f.FileName).Returns(fileName);
+        fileMock.Setup(f => f.Length).Returns(ms.Length);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Validate("some-license-key", "{}", fileMock.Object));
+
+        // Assert
+        var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        badRequestResult.Value.Should().BeOfType<NotFoundException>();
+    }
+
+    [Fact]
+    public async Task Validate_TamperedLicense_ReturnsBadRequest()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var license = CreateAndSaveLicense(LicenseType.Standard);
+        var licenseFile = GenerateLicenseFile(license);
+        licenseFile[5] = (byte)'X'; // Tamper with the license file
+
+        // Create a mock IFormFile
+        var fileMock = new Mock<IFormFile>();
+        var ms = new MemoryStream(licenseFile);
+        fileMock.Setup(f => f.OpenReadStream()).Returns(ms);
+        fileMock.Setup(f => f.FileName).Returns("license.lic");
+        fileMock.Setup(f => f.Length).Returns(ms.Length);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Validate(license.LicenseKey, "{}", fileMock.Object));
+
+        // Assert
+        var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        badRequestResult.Value.Should().BeOfType<InvalidLicenseFormatException>();
+    }
+
+    [Fact]
+    public async Task Validate_ExpiredLicense_ReturnsBadRequest()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var license = CreateAndSaveLicense(LicenseType.Standard, DateTime.UtcNow.AddDays(-30));
+        var licenseFile = GenerateLicenseFile(license);
+
+        // Create a mock IFormFile
+        var fileMock = new Mock<IFormFile>();
+        var content = licenseFile;
+        var fileName = "license.lic";
+        var ms = new MemoryStream(content);
+        fileMock.Setup(f => f.OpenReadStream()).Returns(ms);
+        fileMock.Setup(f => f.FileName).Returns(fileName);
+        fileMock.Setup(f => f.Length).Returns(ms.Length);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Validate(license.LicenseKey, "{}", fileMock.Object));
+
+        // Assert
+        var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        badRequestResult.Value.Should().BeOfType<ExpiredLicenseException>();
+    }
+
+    [Fact]
+    public async Task Validate_RevokedLicense_ReturnsBadRequest()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var license = CreateAndSaveLicense(LicenseType.Standard);
+        license.Status = LicenseStatus.Revoked;
+        _dbContext.Licenses.Update(license);
+        await _dbContext.SaveChangesAsync();
+        var licenseFile = GenerateLicenseFile(license);
+
+        // Create a mock IFormFile
+        var fileMock = new Mock<IFormFile>();
+        var content = licenseFile;
+        var fileName = "license.lic";
+        var ms = new MemoryStream(content);
+        fileMock.Setup(f => f.OpenReadStream()).Returns(ms);
+        fileMock.Setup(f => f.FileName).Returns(fileName);
+        fileMock.Setup(f => f.Length).Returns(ms.Length);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Validate(license.LicenseKey, "{}", fileMock.Object));
+
+        // Assert
+        var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        badRequestResult.Value.Should().BeOfType<LicenseValidationException>();
+    }
+
+    [Fact]
+    public async Task Validate_NodeLockedLicense_HardwareMismatch_ReturnsBadRequest()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var license = CreateAndSaveLicense(LicenseType.NodeLocked, hardwareId: "12345678");
+        var licenseFile = GenerateLicenseFile(license);
+        var validationParams =
+            JsonSerializer.Serialize(new Dictionary<string, string?> { { "HardwareId", "87654321" } });
+
+        // Create a mock IFormFile
+        var fileMock = new Mock<IFormFile>();
+        const string fileName = "license.lic";
+        var ms = new MemoryStream(licenseFile);
+        fileMock.Setup(f => f.OpenReadStream()).Returns(ms);
+        fileMock.Setup(f => f.FileName).Returns(fileName);
+        fileMock.Setup(f => f.Length).Returns(ms.Length);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Validate(license.LicenseKey, validationParams, fileMock.Object));
+
+        // Assert
+        var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        badRequestResult.Value.Should().BeOfType<LicenseValidationException>();
+    }
+
+    #endregion
+
+    #region Activate Tests
+
+    [Fact]
+    public async Task Activate_StandardLicenseWithAdminRole_ReturnsOkResult()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var license = CreateAndSaveLicense(LicenseType.Standard);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Activate(license.LicenseKey, null));
+
+        // Assert
+        result.Should().BeOfType<OkResult>();
+
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        updatedLicense!.Status.Should().Be(LicenseStatus.Active);
+    }
+
+    [Fact]
+    public async Task Activate_TrialLicenseWithAdminRole_ReturnsOkResult()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var license = CreateAndSaveLicense(LicenseType.Trial);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Activate(license.LicenseKey, null));
+
+        // Assert
+        result.Should().BeOfType<OkResult>();
+
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        updatedLicense!.Status.Should().Be(LicenseStatus.Active);
+    }
+
+    [Fact]
+    public async Task Activate_NodeLockedLicenseWithAdminRole_ReturnsOkResult()
+    {
+        // Arrange
+        SetupUser("Admin");
+        const string hardwareId = "12345678";
+        var license = CreateAndSaveLicense(LicenseType.NodeLocked);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Activate(license.LicenseKey, hardwareId));
+
+        // Assert
+        result.Should().BeOfType<OkResult>();
+
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        updatedLicense!.Status.Should().Be(LicenseStatus.Active);
+        updatedLicense.HardwareId.Should().Be(hardwareId);;
+    }
+
+    [Fact]
+    public async Task Activate_ConcurrentLicenseWithAdminRole_BelowLimit_ReturnsOkResult()
+    {
+        // Arrange
+        SetupUser("Admin");
+        const string hardwareId = "12345678";
+        var license = CreateAndSaveLicense(LicenseType.Concurrent, maxActivations: 5);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Activate(license.LicenseKey, hardwareId));
+
+        // Assert
+        result.Should().BeOfType<OkResult>();
+
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        updatedLicense!.Status.Should().Be(LicenseStatus.Active);
+        updatedLicense.ActiveUsersCount.Should().Be(1);
+
+        var activation = await _dbContext.Activations.FirstOrDefaultAsync(a => a.LicenseId == license.LicenseId);
+        activation.Should().NotBeNull();
+        activation!.MachineId.Should().Be(hardwareId);
+    }
+
+    [Fact]
+    public async Task Activate_ConcurrentLicenseWithAdminRole_AtLimit_ReturnsBadRequest()
+    {
+        // Arrange
+        SetupUser("Admin");
+        const string hardwareId = "12345678";
+        var license = CreateAndSaveLicense(LicenseType.Concurrent, maxActivations: 1);
+        await _licenseService.ActivateLicenseAsync(license.LicenseKey, hardwareId);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Activate(license.LicenseKey, hardwareId));
+
+        // Assert
+        var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        badRequestResult.Value.Should().BeOfType<MaximumActivationsReachedException>();
+
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        updatedLicense!.ActiveUsersCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task Activate_FloatingLicenseWithAdminRole_BelowLimit_ReturnsOkResult()
+    {
+        // Arrange
+        SetupUser("Admin");
+        const string hardwareId = "12345678";
+        var license = CreateAndSaveLicense(LicenseType.Floating, maxActivations: 5);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Activate(license.LicenseKey, hardwareId));
+
+        // Assert
+        result.Should().BeOfType<OkResult>();
+
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        updatedLicense!.Status.Should().Be(LicenseStatus.Active);
+        updatedLicense.ActiveUsersCount.Should().Be(1);
+
+        var activation = await _dbContext.Activations.FirstOrDefaultAsync(a => a.LicenseId == license.LicenseId);
+        activation.Should().NotBeNull();
+        activation!.MachineId.Should().Be(hardwareId);
+    }
+
+    [Fact]
+    public async Task Activate_FloatingLicenseWithAdminRole_AtLimit_ReturnsBadRequest()
+    {
+        // Arrange
+        SetupUser("Admin");
+        const string hardwareId = "12345678";
+        var license = CreateAndSaveLicense(LicenseType.Floating, maxActivations: 1);
+        await _licenseService.ActivateLicenseAsync(license.LicenseKey, hardwareId);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Activate(license.LicenseKey, hardwareId));
+
+        // Assert
+        var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        badRequestResult.Value.Should().BeOfType<MaximumActivationsReachedException>();
+
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        updatedLicense!.ActiveUsersCount.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task Activate_SubscriptionLicenseWithAdminRole_ValidDate_ReturnsOkResult()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var license = CreateAndSaveLicense(LicenseType.Subscription, DateTime.UtcNow.AddDays(30));
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Activate(license.LicenseKey, null));
+
+        // Assert
+        result.Should().BeOfType<OkResult>();
+
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        updatedLicense!.Status.Should().Be(LicenseStatus.Active);
+    }
+
+    [Fact]
+    public async Task Activate_SubscriptionLicenseWithAdminRole_Expired_ReturnsBadRequest()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var license = CreateAndSaveLicense(LicenseType.Subscription, DateTime.UtcNow.AddDays(-30));
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Activate(license.LicenseKey, null));
+
+        // Assert
+        var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        badRequestResult.Value.Should().BeOfType<ExpiredLicenseException>();
+    }
+
+    [Fact]
+    public async Task Activate_InvalidLicenseKey_ReturnsBadRequest()
+    {
+        // Arrange
+        SetupUser("Admin");
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Activate("invalid", null));
+
+        // Assert
+        var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        badRequestResult.Value.Should().BeOfType<NotFoundException>();
+    }
+
+    [Fact]
+    public async Task Activate_WithUserRole_ReturnsUnauthorized()
+    {
+        // Arrange
+        SetupUser();
+        var license = CreateAndSaveLicense(LicenseType.Standard);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Activate(license.LicenseKey, null));
+
+        // Assert
+        result.Should().BeOfType<UnauthorizedObjectResult>();
+    }
+
+    #endregion
+
+    #region Revoke Tests
+
+    [Fact]
+    public async Task Revoke_StandardLicenseWithAdminRole_ReturnsOkResult()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var license = CreateAndSaveLicense(LicenseType.Standard);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Revoke(license.LicenseKey, null));
+
+        // Assert
+        result.Should().BeOfType<OkResult>();
+
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        updatedLicense!.Status.Should().Be(LicenseStatus.Revoked);
+    }
+
+    [Fact]
+    public async Task Revoke_TrialLicenseWithAdminRole_ReturnsOkResult()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var license = CreateAndSaveLicense(LicenseType.Trial);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Revoke(license.LicenseKey, null));
+
+        // Assert
+        result.Should().BeOfType<OkResult>();
+
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        updatedLicense!.Status.Should().Be(LicenseStatus.Revoked);
+    }
+
+    [Fact]
+    public async Task Revoke_NodeLockedLicenseWithAdminRole_ReturnsOkResult()
+    {
+        // Arrange
+        SetupUser("Admin");
+        const string hardwareId = "12345678";
+        var license = CreateAndSaveLicense(LicenseType.NodeLocked, hardwareId: hardwareId);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Revoke(license.LicenseKey, hardwareId));
+
+        // Assert
+        result.Should().BeOfType<OkResult>();
+
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        updatedLicense!.Status.Should().Be(LicenseStatus.Revoked);
+        updatedLicense.HardwareId.Should().BeNullOrEmpty();
+    }
+
+    [Fact]
+    public async Task Revoke_ConcurrentLicenseWithAdminRole_ReturnsOkResult()
+    {
+        // Arrange
+        SetupUser("Admin");
+        const string hardwareId = "12345678";
+        var license = CreateAndSaveLicense(LicenseType.Concurrent, maxActivations: 5);
+        await _licenseService.ActivateLicenseAsync(license.LicenseKey, hardwareId);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Revoke(license.LicenseKey, hardwareId));
+
+        // Assert
+        result.Should().BeOfType<OkResult>();
+
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        updatedLicense!.ActiveUsersCount.Should().Be(0);
+
+        var activation = await _dbContext.Activations.FirstOrDefaultAsync(a => a.LicenseId == license.LicenseId);
+        activation.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Revoke_FloatingLicenseWithAdminRole_ReturnsOkResult()
+    {
+        // Arrange
+        SetupUser("Admin");
+        const string hardwareId = "12345678";
+        var license = CreateAndSaveLicense(LicenseType.Floating, maxActivations: 5);
+        await _licenseService.ActivateLicenseAsync(license.LicenseKey, hardwareId);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Revoke(license.LicenseKey, hardwareId));
+
+        // Assert
+        result.Should().BeOfType<OkResult>();
+
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        updatedLicense!.ActiveUsersCount.Should().Be(0);
+
+        var activation = await _dbContext.Activations.FirstOrDefaultAsync(a => a.LicenseId == license.LicenseId);
+        activation.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Revoke_SubscriptionLicenseWithAdminRole_ReturnsOkResult()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var license = CreateAndSaveLicense(LicenseType.Subscription, DateTime.UtcNow.AddDays(30));
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Revoke(license.LicenseKey, null));
+
+        // Assert
+        result.Should().BeOfType<OkResult>();
+
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        updatedLicense!.Status.Should().Be(LicenseStatus.Revoked);
+    }
+
+    [Fact]
+    public async Task Revoke_InvalidLicenseKey_ReturnsNotFound()
+    {
+        // Arrange
+        SetupUser("Admin");
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Revoke("invalid", null));
+
+        // Assert
+        result.Should().BeOfType<NotFoundObjectResult>();
+    }
+
+    [Fact]
+    public async Task Revoke_WithUserRole_ReturnsUnauthorized()
+    {
+        // Arrange
+        SetupUser();
+        var license = CreateAndSaveLicense(LicenseType.Standard);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Revoke(license.LicenseKey, null));
+
+        // Assert
+        result.Should().BeOfType<UnauthorizedObjectResult>();
+    }
+
+    #endregion
+
+    #region Disconnect Tests
+
+    [Fact]
+    public async Task Disconnect_ConcurrentLicenseWithUserRole_ReturnsOkResult()
+    {
+        // Arrange
+        SetupUser();
+        const string hardwareId = "12345678";
+        var license = CreateAndSaveLicense(LicenseType.Concurrent, maxActivations: 5);
+        await _licenseService.ActivateLicenseAsync(license.LicenseKey, hardwareId);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Disconnect(license.LicenseKey, hardwareId));
+
+        // Assert
+        result.Should().BeOfType<OkResult>();
+
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        updatedLicense!.ActiveUsersCount.Should().Be(0);
+
+        var activation = await _dbContext.Activations.FirstOrDefaultAsync(a => a.LicenseId == license.LicenseId);
+        activation.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Disconnect_InvalidLicenseType_ReturnsNotFound()
+    {
+        // Arrange
+        SetupUser();
+        const string hardwareId = "12345678";
+        var license = CreateAndSaveLicense(LicenseType.NodeLocked, hardwareId: hardwareId);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Disconnect(license.LicenseKey, hardwareId));
+
+        // Assert
+        var notFoundResult = result.Should().BeOfType<NotFoundObjectResult>().Subject;
+        notFoundResult.Value.Should().BeOfType<InvalidLicenseFormatException>();
+    }
+
+    [Fact]
+    public async Task Disconnect_WithAdminRole_ReturnsUnauthorized()
+    {
+        // Arrange
+        SetupUser("Admin");
+        const string hardwareId = "12345678";
+        var license = CreateAndSaveLicense(LicenseType.Concurrent, maxActivations: 5);
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Disconnect(license.LicenseKey, hardwareId));
+
+        // Assert
+        result.Should().BeOfType<UnauthorizedObjectResult>();
+    }
+
+    #endregion
+
+    #region Renew Tests
+
+    [Fact]
+    public async Task RenewLicense_SubscriptionLicenseWithAdminRole_ValidDate_ReturnsOkResult()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var license = CreateAndSaveLicense(LicenseType.Subscription, DateTime.UtcNow.AddDays(30));
+        var newExpirationDate = DateTime.UtcNow.AddDays(60);
+        var request = new RenewLicenseRequest
+        {
+            LicenseKey = license.LicenseKey,
+            NewExpirationDate = newExpirationDate
+        };
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.RenewLicense(request));
+
+        // Assert
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        var updatedLicenseFile = okResult.Value.Should().BeOfType<byte[]>().Subject;
+        updatedLicenseFile.Should().NotBeNullOrEmpty();
+
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        updatedLicense!.SubscriptionExpiryDate.Should().Be(newExpirationDate);
+    }
+
+    [Fact]
+    public async Task RenewLicense_NonSubscriptionLicense_ReturnsBadRequest()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var license = CreateAndSaveLicense(LicenseType.Standard);
+        var newExpirationDate = DateTime.UtcNow.AddDays(60);
+        var request = new RenewLicenseRequest
+        {
+            LicenseKey = license.LicenseKey,
+            NewExpirationDate = newExpirationDate
+        };
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.RenewLicense(request));
+
+        // Assert
+        result.Should().BeOfType<BadRequestObjectResult>();
+    }
+
+    [Fact]
+    public async Task RenewLicense_RevokedLicense_ReturnsBadRequest()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var license = CreateAndSaveLicense(LicenseType.Subscription, DateTime.UtcNow.AddDays(30));
+        license.Status = LicenseStatus.Revoked;
+        _dbContext.Licenses.Update(license);
+        await _dbContext.SaveChangesAsync();
+        var newExpirationDate = DateTime.UtcNow.AddDays(60);
+        var request = new RenewLicenseRequest
+        {
+            LicenseKey = license.LicenseKey,
+            NewExpirationDate = newExpirationDate
+        };
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.RenewLicense(request));
+
+        // Assert
+        result.Should().BeOfType<BadRequestObjectResult>();
+    }
+
+    [Fact]
+    public async Task RenewLicense_InvalidExpirationDate_ReturnsBadRequest()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var license = CreateAndSaveLicense(LicenseType.Subscription, DateTime.UtcNow.AddDays(30));
+        var newExpirationDate = DateTime.UtcNow.AddDays(-30); // Past date
+        var request = new RenewLicenseRequest
+        {
+            LicenseKey = license.LicenseKey,
+            NewExpirationDate = newExpirationDate
+        };
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.RenewLicense(request));
+
+        // Assert
+        result.Should().BeOfType<BadRequestObjectResult>();
+    }
+
+    [Fact]
+    public async Task RenewLicense_WithUserRole_ReturnsUnauthorized()
+    {
+        // Arrange
+        SetupUser();
+        var license = CreateAndSaveLicense(LicenseType.Subscription, DateTime.UtcNow.AddDays(30));
+        var newExpirationDate = DateTime.UtcNow.AddDays(60);
+        var request = new RenewLicenseRequest
+        {
+            LicenseKey = license.LicenseKey,
+            NewExpirationDate = newExpirationDate
+        };
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.RenewLicense(request));
+
+        // Assert
+        result.Should().BeOfType<UnauthorizedObjectResult>();
+    }
+
+    #endregion
+
+    #region Heartbeat Tests
+
+    [Fact]
+    public async Task Heartbeat_ValidRequestWithUserRole_ReturnsOkResult()
+    {
+        // Arrange
+        SetupUser();
+        var license = CreateAndSaveLicense(LicenseType.Concurrent, maxActivations: 5);
+        const string machineId = "12345678";
+        await _licenseService.ActivateLicenseAsync(license.LicenseKey, machineId);
+        var request = new HeartbeatRequest { LicenseKey = license.LicenseKey, MachineId = machineId };
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Heartbeat(request));
+
+        // Assert
+        result.Should().BeOfType<OkResult>();
+    }
+
+    [Fact]
+    public async Task Heartbeat_NonExistentActivation_ReturnsNotFound()
+    {
+        // Arrange
+        SetupUser();
+        var request = new HeartbeatRequest { LicenseKey = "non-existent-key", MachineId = "12345678" };
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Heartbeat(request));
+
+        // Assert
+        result.Should().BeOfType<NotFoundResult>();
+    }
+
+    [Fact]
+    public async Task Heartbeat_WithAdminRole_ReturnsUnauthorized()
+    {
+        // Arrange
+        SetupUser("Admin");
+        var license = CreateAndSaveLicense(LicenseType.Concurrent, maxActivations: 5);
+        const string machineId = "12345678";
+        var request = new HeartbeatRequest { LicenseKey = license.LicenseKey, MachineId = machineId };
+
+        // Act
+        var result = await ExecuteControllerAction(() => _controller.Heartbeat(request));
+
+        // Assert
+        result.Should().BeOfType<UnauthorizedObjectResult>();
+    }
+
+    #endregion
+
+    #region Private
+
     private void SeedDatabase()
     {
         // Add product and features
@@ -92,9 +998,9 @@ public class LicensesControllerTests
 
         // Link features to product
         _dbContext.LicenseFeatures.Add(new LicenseFeature
-            { ProductId = _dbContext.Products.First().ProductId, FeatureId = _dbContext.Features.First().FeatureId });
+        { ProductId = _dbContext.Products.First().ProductId, FeatureId = _dbContext.Features.First().FeatureId });
         _dbContext.LicenseFeatures.Add(new LicenseFeature
-            { ProductId = _dbContext.Products.First().ProductId, FeatureId = _dbContext.Features.Last().FeatureId });
+        { ProductId = _dbContext.Products.First().ProductId, FeatureId = _dbContext.Features.Last().FeatureId });
         _dbContext.SaveChanges();
     }
 
@@ -192,8 +1098,6 @@ public class LicensesControllerTests
         };
     }
 
-    // Helper Methods for Tests
-
     private License CreateAndSaveLicense(LicenseType licenseType, DateTime? expirationDate = null,
         string? hardwareId = null, int? maxActivations = null)
     {
@@ -248,907 +1152,6 @@ public class LicensesControllerTests
         };
     }
 
-    #region Generate Tests
-
-    [Fact]
-    public async Task Generate_ValidRequestWithAdminRole_ReturnsOkResultWithLicense()
-    {
-        // Arrange
-        SetupUser("Admin"); // Set up user with Admin role
-        var productId = _dbContext.Products.First().ProductId;
-        var featureId = _dbContext.Features.First().FeatureId;
-        var request = new LicenseGenerationRequest
-        {
-            LicenseType = LicenseType.Standard,
-            ExpirationDate = DateTime.UtcNow.AddDays(30),
-            ProductId = productId,
-            IssuedTo = "Test User",
-            FeatureIds = [featureId]
-        };
-
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Generate(request));
-
-        // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        var license = Assert.IsType<byte[]>(okResult.Value);
-        Assert.NotNull(license);
-        Assert.NotEmpty(license);
-    }
-
-    [Fact]
-    public async Task Generate_ValidRequestWithUserRole_ReturnsUnauthorized()
-    {
-        // Arrange
-        SetupUser();
-        var productId = _dbContext.Products.First().ProductId;
-        var featureId = _dbContext.Features.First().FeatureId;
-        var request = new LicenseGenerationRequest
-        {
-            LicenseType = LicenseType.Standard,
-            ExpirationDate = DateTime.UtcNow.AddDays(30),
-            ProductId = productId,
-            IssuedTo = "Test User",
-            FeatureIds = [featureId]
-        };
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Generate(request));
-
-        // Assert
-        Assert.IsType<UnauthorizedObjectResult>(result);
-    }
-
-    [Fact]
-    public async Task Generate_InvalidProductId_ThrowsNotFoundException()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var request = new LicenseGenerationRequest
-        {
-            LicenseType = LicenseType.Standard,
-            ExpirationDate = DateTime.UtcNow.AddDays(30),
-            ProductId = Guid.NewGuid(), // Invalid ProductId
-            IssuedTo = "Test User"
-        };
-
-        // Act & Assert
-        await Assert.ThrowsAsync<NotFoundException>(async () =>
-            await ExecuteControllerAction(() => _controller.Generate(request)));
-    }
-
-    [Fact]
-    public async Task Generate_InvalidFeatureIds_ThrowsNotFoundException()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var productId = _dbContext.Products.First().ProductId;
-        var request = new LicenseGenerationRequest
-        {
-            LicenseType = LicenseType.Standard,
-            ExpirationDate = DateTime.UtcNow.AddDays(30),
-            ProductId = productId,
-            IssuedTo = "Test User",
-            FeatureIds = [Guid.NewGuid()] // Invalid FeatureId
-        };
-
-        // Act & Assert
-        await Assert.ThrowsAsync<NotFoundException>(async () =>
-            await ExecuteControllerAction(() => _controller.Generate(request)));
-    }
-
-    [Fact]
-    public async Task Generate_ExpirationDateInThePast_ThrowsBadRequestException()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var productId = _dbContext.Products.First().ProductId;
-        var request = new LicenseGenerationRequest
-        {
-            LicenseType = LicenseType.Standard,
-            ExpirationDate = DateTime.UtcNow.AddDays(-30), // Past Expiration Date
-            ProductId = productId,
-            IssuedTo = "Test User"
-        };
-
-        // Act & Assert
-        await Assert.ThrowsAsync<BadRequestException>(async () =>
-            await ExecuteControllerAction(() => _controller.Generate(request)));
-    }
-
     #endregion
 
-    #region Validate Tests
-
-    [Fact]
-    public async Task Validate_ValidLicenseWithAdminRole_ReturnsOkResult()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var license = CreateAndSaveLicense(LicenseType.Standard);
-        var licenseFile = GenerateLicenseFile(license);
-        var validationParams = JsonSerializer.Serialize(new Dictionary<string, string>
-        {
-            { "UserName", license.IssuedTo },
-            { "SerialNumber", license.LicenseKey }
-        });
-
-        // Create a mock IFormFile
-        var fileMock = new Mock<IFormFile>();
-        const string fileName = "license.lic";
-        var ms = new MemoryStream(licenseFile);
-        fileMock.Setup(f => f.OpenReadStream()).Returns(ms);
-        fileMock.Setup(f => f.FileName).Returns(fileName);
-        fileMock.Setup(f => f.Length).Returns(ms.Length);
-
-        // Act
-        var result = await ExecuteControllerAction(() =>
-            _controller.Validate(license.LicenseKey, validationParams, fileMock.Object));
-
-        // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        Assert.Equal("License is valid", okResult.Value);
-    }
-
-    [Fact]
-    public async Task Validate_ValidLicenseWithUserRole_ReturnsOkResult()
-    {
-        // Arrange
-        SetupUser();
-        var license = CreateAndSaveLicense(LicenseType.Standard);
-        var licenseFile = GenerateLicenseFile(license);
-        var validationParams = JsonSerializer.Serialize(new Dictionary<string, string>
-        {
-            { "UserName", license.IssuedTo },
-            { "SerialNumber", license.LicenseKey }
-        });
-
-        // Create a mock IFormFile
-        var fileMock = new Mock<IFormFile>();
-        const string fileName = "license.lic";
-        var ms = new MemoryStream(licenseFile);
-        fileMock.Setup(f => f.OpenReadStream()).Returns(ms);
-        fileMock.Setup(f => f.FileName).Returns(fileName);
-        fileMock.Setup(f => f.Length).Returns(ms.Length);
-
-        // Act
-        var result = await ExecuteControllerAction(() =>
-            _controller.Validate(license.LicenseKey, validationParams, fileMock.Object));
-
-        // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        Assert.Equal("License is valid", okResult.Value);
-    }
-
-    [Fact]
-    public async Task Validate_MissingLicenseKey_ReturnsBadRequest()
-    {
-        // Arrange
-        SetupUser("Admin");
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Validate(string.Empty, "{}", null!));
-
-        // Assert
-        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal("License key is required.", badRequestResult.Value);
-    }
-
-    [Fact]
-    public async Task Validate_MissingLicenseFile_ReturnsBadRequest()
-    {
-        // Arrange
-        SetupUser("Admin");
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Validate("some-license-key", "{}", null!));
-
-        // Assert
-        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal("License file is required.", badRequestResult.Value);
-    }
-
-    [Fact]
-    public async Task Validate_InvalidLicenseFormat_ReturnsBadRequest()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var licenseFile = "Invalid License Data"u8.ToArray();
-
-        // Create a mock IFormFile
-        var fileMock = new Mock<IFormFile>();
-        const string fileName = "license.lic";
-        var ms = new MemoryStream(licenseFile);
-        fileMock.Setup(f => f.OpenReadStream()).Returns(ms);
-        fileMock.Setup(f => f.FileName).Returns(fileName);
-        fileMock.Setup(f => f.Length).Returns(ms.Length);
-
-        // Act
-        var result =
-            await ExecuteControllerAction(() => _controller.Validate("some-license-key", "{}", fileMock.Object));
-
-        // Assert
-        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.IsType<NotFoundException>(badRequestResult.Value);
-    }
-
-    [Fact]
-    public async Task Validate_TamperedLicense_ReturnsBadRequest()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var license = CreateAndSaveLicense(LicenseType.Standard);
-        var licenseFile = GenerateLicenseFile(license);
-        licenseFile[5] = (byte)'X'; // Tamper with the license file
-
-        // Create a mock IFormFile
-        var fileMock = new Mock<IFormFile>();
-        var ms = new MemoryStream(licenseFile);
-        fileMock.Setup(f => f.OpenReadStream()).Returns(ms);
-        fileMock.Setup(f => f.FileName).Returns("license.lic");
-        fileMock.Setup(f => f.Length).Returns(ms.Length);
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Validate(license.LicenseKey, "{}", fileMock.Object));
-
-        // Assert
-        var badRequestResult = result as BadRequestObjectResult;
-        badRequestResult.Should().NotBeNull();
-        badRequestResult!.Value.Should().BeOfType<InvalidLicenseFormatException>();
-
-    }
-
-    [Fact]
-    public async Task Validate_ExpiredLicense_ReturnsBadRequest()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var license = CreateAndSaveLicense(LicenseType.Standard, DateTime.UtcNow.AddDays(-30));
-        var licenseFile = GenerateLicenseFile(license);
-
-        // Create a mock IFormFile
-        var fileMock = new Mock<IFormFile>();
-        var content = licenseFile;
-        var fileName = "license.lic";
-        var ms = new MemoryStream(content);
-        fileMock.Setup(f => f.OpenReadStream()).Returns(ms);
-        fileMock.Setup(f => f.FileName).Returns(fileName);
-        fileMock.Setup(f => f.Length).Returns(ms.Length);
-
-        // Act
-        var result =
-            await ExecuteControllerAction(() => _controller.Validate(license.LicenseKey, "{}", fileMock.Object));
-
-        // Assert
-        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.IsType<ExpiredLicenseException>(badRequestResult.Value);
-    }
-
-    [Fact]
-    public async Task Validate_RevokedLicense_ReturnsBadRequest()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var license = CreateAndSaveLicense(LicenseType.Standard);
-        license.Status = LicenseStatus.Revoked;
-        _dbContext.Licenses.Update(license);
-        await _dbContext.SaveChangesAsync();
-        var licenseFile = GenerateLicenseFile(license);
-
-        // Create a mock IFormFile
-        var fileMock = new Mock<IFormFile>();
-        var content = licenseFile;
-        var fileName = "license.lic";
-        var ms = new MemoryStream(content);
-        fileMock.Setup(f => f.OpenReadStream()).Returns(ms);
-        fileMock.Setup(f => f.FileName).Returns(fileName);
-        fileMock.Setup(f => f.Length).Returns(ms.Length);
-
-        // Act
-        var result =
-            await ExecuteControllerAction(() => _controller.Validate(license.LicenseKey, "{}", fileMock.Object));
-
-        // Assert
-        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.IsType<LicenseValidationException>(badRequestResult.Value);
-    }
-
-    [Fact]
-    public async Task Validate_NodeLockedLicense_HardwareMismatch_ReturnsBadRequest()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var license = CreateAndSaveLicense(LicenseType.NodeLocked, hardwareId: "12345678");
-        var licenseFile = GenerateLicenseFile(license);
-        var validationParams =
-            JsonSerializer.Serialize(new Dictionary<string, string?> { { "HardwareId", "87654321" } });
-
-        // Create a mock IFormFile
-        var fileMock = new Mock<IFormFile>();
-        const string fileName = "license.lic";
-        var ms = new MemoryStream(licenseFile);
-        fileMock.Setup(f => f.OpenReadStream()).Returns(ms);
-        fileMock.Setup(f => f.FileName).Returns(fileName);
-        fileMock.Setup(f => f.Length).Returns(ms.Length);
-
-        // Act
-        var result = await ExecuteControllerAction(() =>
-            _controller.Validate(license.LicenseKey, validationParams, fileMock.Object));
-
-        // Assert
-        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.IsType<LicenseValidationException>(badRequestResult.Value);
-    }
-
-    #endregion
-
-    #region Activate Tests
-
-    [Fact]
-    public async Task Activate_StandardLicenseWithAdminRole_ReturnsOkResult()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var license = CreateAndSaveLicense(LicenseType.Standard);
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Activate(license.LicenseKey, null));
-
-        // Assert
-        Assert.IsType<OkResult>(result);
-
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
-        Assert.Equal(LicenseStatus.Active, updatedLicense!.Status);
-    }
-
-    [Fact]
-    public async Task Activate_TrialLicenseWithAdminRole_ReturnsOkResult()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var license = CreateAndSaveLicense(LicenseType.Trial);
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Activate(license.LicenseKey, null));
-
-        // Assert
-        Assert.IsType<OkResult>(result);
-
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
-        Assert.Equal(LicenseStatus.Active, updatedLicense!.Status);
-    }
-
-    [Fact]
-    public async Task Activate_NodeLockedLicenseWithAdminRole_ReturnsOkResult()
-    {
-        // Arrange
-        SetupUser("Admin");
-        const string hardwareId = "12345678";
-        var license = CreateAndSaveLicense(LicenseType.NodeLocked);
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Activate(license.LicenseKey, hardwareId));
-
-        // Assert
-        Assert.IsType<OkResult>(result);
-
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
-        Assert.Equal(LicenseStatus.Active, updatedLicense!.Status);
-        Assert.Equal(hardwareId, updatedLicense.HardwareId);
-    }
-
-    [Fact]
-    public async Task Activate_ConcurrentLicenseWithAdminRole_BelowLimit_ReturnsOkResult()
-    {
-        // Arrange
-        SetupUser("Admin");
-        const string hardwareId = "12345678";
-        var license = CreateAndSaveLicense(LicenseType.Concurrent, maxActivations: 5);
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Activate(license.LicenseKey, hardwareId));
-
-        // Assert
-        Assert.IsType<OkResult>(result);
-
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
-        Assert.Equal(LicenseStatus.Active, updatedLicense!.Status);
-        Assert.Equal(1, updatedLicense.ActiveUsersCount);
-
-        var activation = await _dbContext.Activations.FirstOrDefaultAsync(a => a.LicenseId == license.LicenseId);
-        Assert.NotNull(activation);
-        Assert.Equal(hardwareId, activation.MachineId);
-    }
-
-    [Fact]
-    public async Task Activate_ConcurrentLicenseWithAdminRole_AtLimit_ReturnsBadRequest()
-    {
-        // Arrange
-        SetupUser("Admin");
-        const string hardwareId = "12345678";
-        var license = CreateAndSaveLicense(LicenseType.Concurrent, maxActivations: 1);
-        await _licenseService.ActivateLicenseAsync(license.LicenseKey, hardwareId);
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Activate(license.LicenseKey, hardwareId));
-
-        // Assert
-        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.IsType<MaximumActivationsReachedException>(badRequestResult.Value);
-
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
-        Assert.Equal(1, updatedLicense!.ActiveUsersCount);
-    }
-
-    [Fact]
-    public async Task Activate_FloatingLicenseWithAdminRole_BelowLimit_ReturnsOkResult()
-    {
-        // Arrange
-        SetupUser("Admin");
-        const string hardwareId = "12345678";
-        var license = CreateAndSaveLicense(LicenseType.Floating, maxActivations: 5);
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Activate(license.LicenseKey, hardwareId));
-
-        // Assert
-        Assert.IsType<OkResult>(result);
-
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
-        Assert.Equal(LicenseStatus.Active, updatedLicense!.Status);
-        Assert.Equal(1, updatedLicense.ActiveUsersCount);
-
-        var activation = await _dbContext.Activations.FirstOrDefaultAsync(a => a.LicenseId == license.LicenseId);
-        Assert.NotNull(activation);
-        Assert.Equal(hardwareId, activation.MachineId);
-    }
-
-    [Fact]
-    public async Task Activate_FloatingLicenseWithAdminRole_AtLimit_ReturnsBadRequest()
-    {
-        // Arrange
-        SetupUser("Admin");
-        const string hardwareId = "12345678";
-        var license = CreateAndSaveLicense(LicenseType.Floating, maxActivations: 1);
-        await _licenseService.ActivateLicenseAsync(license.LicenseKey, hardwareId);
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Activate(license.LicenseKey, hardwareId));
-
-        // Assert
-        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.IsType<MaximumActivationsReachedException>(badRequestResult.Value);
-
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
-        Assert.Equal(1, updatedLicense!.ActiveUsersCount);
-    }
-
-    [Fact]
-    public async Task Activate_SubscriptionLicenseWithAdminRole_ValidDate_ReturnsOkResult()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var license = CreateAndSaveLicense(LicenseType.Subscription, DateTime.UtcNow.AddDays(30));
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Activate(license.LicenseKey, null));
-
-        // Assert
-        Assert.IsType<OkResult>(result);
-
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
-        Assert.Equal(LicenseStatus.Active, updatedLicense!.Status);
-    }
-
-    [Fact]
-    public async Task Activate_SubscriptionLicenseWithAdminRole_Expired_ReturnsBadRequest()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var license = CreateAndSaveLicense(LicenseType.Subscription, DateTime.UtcNow.AddDays(-30));
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Activate(license.LicenseKey, null));
-
-        // Assert
-        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.IsType<ExpiredLicenseException>(badRequestResult.Value);
-    }
-
-    [Fact]
-    public async Task Activate_InvalidLicenseKey_ReturnsBadRequest()
-    {
-        // Arrange
-        SetupUser("Admin");
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Activate("invalid", null));
-
-        // Assert
-        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.IsType<NotFoundException>(badRequestResult.Value);
-    }
-
-    [Fact]
-    public async Task Activate_WithUserRole_ReturnsUnauthorized()
-    {
-        // Arrange
-        SetupUser();
-        var license = CreateAndSaveLicense(LicenseType.Standard);
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Activate(license.LicenseKey, null));
-
-        // Assert
-        Assert.IsType<UnauthorizedObjectResult>(result);
-    }
-
-    #endregion
-
-    #region Revoke Tests
-
-    [Fact]
-    public async Task Revoke_StandardLicenseWithAdminRole_ReturnsOkResult()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var license = CreateAndSaveLicense(LicenseType.Standard);
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Revoke(license.LicenseKey, null));
-
-        // Assert
-        Assert.IsType<OkResult>(result);
-
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
-        Assert.Equal(LicenseStatus.Revoked, updatedLicense!.Status);
-    }
-
-    [Fact]
-    public async Task Revoke_TrialLicenseWithAdminRole_ReturnsOkResult()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var license = CreateAndSaveLicense(LicenseType.Trial);
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Revoke(license.LicenseKey, null));
-
-        // Assert
-        Assert.IsType<OkResult>(result);
-
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
-        Assert.Equal(LicenseStatus.Revoked, updatedLicense!.Status);
-    }
-
-    [Fact]
-    public async Task Revoke_NodeLockedLicenseWithAdminRole_ReturnsOkResult()
-    {
-        // Arrange
-        SetupUser("Admin");
-        const string hardwareId = "12345678";
-        var license = CreateAndSaveLicense(LicenseType.NodeLocked, hardwareId: hardwareId);
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Revoke(license.LicenseKey, hardwareId));
-
-        // Assert
-        Assert.IsType<OkResult>(result);
-
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
-        Assert.Equal(LicenseStatus.Revoked, updatedLicense!.Status);
-        Assert.Null(updatedLicense.HardwareId);
-    }
-
-    [Fact]
-    public async Task Revoke_ConcurrentLicenseWithAdminRole_ReturnsOkResult()
-    {
-        // Arrange
-        SetupUser("Admin");
-        const string hardwareId = "12345678";
-        var license = CreateAndSaveLicense(LicenseType.Concurrent, maxActivations: 5);
-        await _licenseService.ActivateLicenseAsync(license.LicenseKey, hardwareId);
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Revoke(license.LicenseKey, hardwareId));
-
-        // Assert
-        Assert.IsType<OkResult>(result);
-
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
-        Assert.Equal(0, updatedLicense!.ActiveUsersCount);
-
-        var activation = await _dbContext.Activations.FirstOrDefaultAsync(a => a.LicenseId == license.LicenseId);
-        Assert.Null(activation);
-    }
-
-    [Fact]
-    public async Task Revoke_FloatingLicenseWithAdminRole_ReturnsOkResult()
-    {
-        // Arrange
-        SetupUser("Admin");
-        const string hardwareId = "12345678";
-        var license = CreateAndSaveLicense(LicenseType.Floating, maxActivations: 5);
-        await _licenseService.ActivateLicenseAsync(license.LicenseKey, hardwareId);
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Revoke(license.LicenseKey, hardwareId));
-
-        // Assert
-        Assert.IsType<OkResult>(result);
-
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
-        Assert.Equal(0, updatedLicense!.ActiveUsersCount);
-
-        var activation = await _dbContext.Activations.FirstOrDefaultAsync(a => a.LicenseId == license.LicenseId);
-        Assert.Null(activation);
-    }
-
-    [Fact]
-    public async Task Revoke_SubscriptionLicenseWithAdminRole_ReturnsOkResult()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var license = CreateAndSaveLicense(LicenseType.Subscription, DateTime.UtcNow.AddDays(30));
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Revoke(license.LicenseKey, null));
-
-        // Assert
-        Assert.IsType<OkResult>(result);
-
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
-        Assert.Equal(LicenseStatus.Revoked, updatedLicense!.Status);
-    }
-
-    [Fact]
-    public async Task Revoke_InvalidLicenseKey_ReturnsNotFound()
-    {
-        // Arrange
-        SetupUser("Admin");
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Revoke("invalid", null));
-
-        // Assert
-        Assert.IsType<NotFoundObjectResult>(result);
-    }
-
-    [Fact]
-    public async Task Revoke_WithUserRole_ReturnsUnauthorized()
-    {
-        // Arrange
-        SetupUser();
-        var license = CreateAndSaveLicense(LicenseType.Standard);
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Revoke(license.LicenseKey, null));
-
-        // Assert
-        Assert.IsType<UnauthorizedObjectResult>(result);
-    }
-
-    #endregion
-
-    #region Disconnect Tests
-
-    [Fact]
-    public async Task Disconnect_ConcurrentLicenseWithUserRole_ReturnsOkResult()
-    {
-        // Arrange
-        SetupUser();
-        const string hardwareId = "12345678";
-        var license = CreateAndSaveLicense(LicenseType.Concurrent, maxActivations: 5);
-        await _licenseService.ActivateLicenseAsync(license.LicenseKey, hardwareId);
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Disconnect(license.LicenseKey, hardwareId));
-
-        // Assert
-        Assert.IsType<OkResult>(result);
-
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
-        Assert.Equal(0, updatedLicense!.ActiveUsersCount);
-
-        var activation = await _dbContext.Activations.FirstOrDefaultAsync(a => a.LicenseId == license.LicenseId);
-        Assert.Null(activation);
-    }
-
-    [Fact]
-    public async Task Disconnect_InvalidLicenseType_ReturnsNotFound()
-    {
-        // Arrange
-        SetupUser();
-        const string hardwareId = "12345678";
-        var license = CreateAndSaveLicense(LicenseType.NodeLocked, hardwareId: hardwareId);
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Disconnect(license.LicenseKey, hardwareId));
-
-        // Assert
-        var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
-        Assert.IsType<InvalidLicenseFormatException>(notFoundResult.Value);
-    }
-
-    [Fact]
-    public async Task Disconnect_WithAdminRole_ReturnsUnauthorized()
-    {
-        // Arrange
-        SetupUser("Admin");
-        const string hardwareId = "12345678";
-        var license = CreateAndSaveLicense(LicenseType.Concurrent, maxActivations: 5);
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Disconnect(license.LicenseKey, hardwareId));
-
-        // Assert
-        Assert.IsType<UnauthorizedObjectResult>(result);
-    }
-
-    #endregion
-
-    #region Renew Tests
-
-    [Fact]
-    public async Task RenewLicense_SubscriptionLicenseWithAdminRole_ValidDate_ReturnsOkResult()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var license = CreateAndSaveLicense(LicenseType.Subscription, DateTime.UtcNow.AddDays(30));
-        var newExpirationDate = DateTime.UtcNow.AddDays(60);
-        var request = new RenewLicenseRequest
-        {
-            LicenseKey = license.LicenseKey,
-            NewExpirationDate = newExpirationDate
-        };
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.RenewLicense(request));
-
-        // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        var updatedLicenseFile = Assert.IsType<byte[]>(okResult.Value);
-        Assert.NotNull(updatedLicenseFile);
-        Assert.NotEmpty(updatedLicenseFile);
-
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
-        Assert.Equal(newExpirationDate, updatedLicense!.SubscriptionExpiryDate);
-    }
-
-    [Fact]
-    public async Task RenewLicense_NonSubscriptionLicense_ReturnsBadRequest()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var license = CreateAndSaveLicense(LicenseType.Standard);
-        var newExpirationDate = DateTime.UtcNow.AddDays(60);
-        var request = new RenewLicenseRequest
-        {
-            LicenseKey = license.LicenseKey,
-            NewExpirationDate = newExpirationDate
-        };
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.RenewLicense(request));
-
-        // Assert
-        Assert.IsType<BadRequestObjectResult>(result);
-    }
-
-    [Fact]
-    public async Task RenewLicense_RevokedLicense_ReturnsBadRequest()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var license = CreateAndSaveLicense(LicenseType.Subscription, DateTime.UtcNow.AddDays(30));
-        license.Status = LicenseStatus.Revoked;
-        _dbContext.Licenses.Update(license);
-        await _dbContext.SaveChangesAsync();
-        var newExpirationDate = DateTime.UtcNow.AddDays(60);
-        var request = new RenewLicenseRequest
-        {
-            LicenseKey = license.LicenseKey,
-            NewExpirationDate = newExpirationDate
-        };
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.RenewLicense(request));
-
-        // Assert
-        Assert.IsType<BadRequestObjectResult>(result);
-    }
-
-    [Fact]
-    public async Task RenewLicense_InvalidExpirationDate_ReturnsBadRequest()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var license = CreateAndSaveLicense(LicenseType.Subscription, DateTime.UtcNow.AddDays(30));
-        var newExpirationDate = DateTime.UtcNow.AddDays(-30); // Past date
-        var request = new RenewLicenseRequest
-        {
-            LicenseKey = license.LicenseKey,
-            NewExpirationDate = newExpirationDate
-        };
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.RenewLicense(request));
-
-        // Assert
-        Assert.IsType<BadRequestObjectResult>(result);
-    }
-
-    [Fact]
-    public async Task RenewLicense_WithUserRole_ReturnsUnauthorized()
-    {
-        // Arrange
-        SetupUser();
-        var license = CreateAndSaveLicense(LicenseType.Subscription, DateTime.UtcNow.AddDays(30));
-        var newExpirationDate = DateTime.UtcNow.AddDays(60);
-        var request = new RenewLicenseRequest
-        {
-            LicenseKey = license.LicenseKey,
-            NewExpirationDate = newExpirationDate
-        };
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.RenewLicense(request));
-
-        // Assert
-        Assert.IsType<UnauthorizedObjectResult>(result);
-    }
-
-    #endregion
-
-    #region Heartbeat Tests
-
-    [Fact]
-    public async Task Heartbeat_ValidRequestWithUserRole_ReturnsOkResult()
-    {
-        // Arrange
-        SetupUser();
-        var license = CreateAndSaveLicense(LicenseType.Concurrent, maxActivations: 5);
-        const string machineId = "12345678";
-        await _licenseService.ActivateLicenseAsync(license.LicenseKey, machineId);
-        var request = new HeartbeatRequest { LicenseKey = license.LicenseKey, MachineId = machineId };
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Heartbeat(request));
-
-        // Assert
-        Assert.IsType<OkResult>(result);
-    }
-
-    [Fact]
-    public async Task Heartbeat_NonExistentActivation_ReturnsNotFound()
-    {
-        // Arrange
-        SetupUser();
-        var request = new HeartbeatRequest { LicenseKey = "non-existent-key", MachineId = "12345678" };
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Heartbeat(request));
-
-        // Assert
-        Assert.IsType<NotFoundResult>(result);
-    }
-
-    [Fact]
-    public async Task Heartbeat_WithAdminRole_ReturnsUnauthorized()
-    {
-        // Arrange
-        SetupUser("Admin");
-        var license = CreateAndSaveLicense(LicenseType.Concurrent, maxActivations: 5);
-        const string machineId = "12345678";
-        var request = new HeartbeatRequest { LicenseKey = license.LicenseKey, MachineId = machineId };
-
-        // Act
-        var result = await ExecuteControllerAction(() => _controller.Heartbeat(request));
-
-        // Assert
-        Assert.IsType<UnauthorizedObjectResult>(result);
-    }
-
-    #endregion
 }

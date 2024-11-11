@@ -15,7 +15,9 @@ public class LicensesController(LicenseService licenseService) : ControllerBase
     public async Task<IActionResult> Generate([FromBody] LicenseGenerationRequest request)
     {
         if (!ModelState.IsValid)
+        {
             return BadRequest(ModelState);
+        }
 
         var license = await licenseService.GenerateLicenseAsync(request);
         return Ok(license);
@@ -27,10 +29,14 @@ public class LicensesController(LicenseService licenseService) : ControllerBase
         [FromForm] IFormFile? licenseFile = null)
     {
         if (string.IsNullOrEmpty(licenseKey))
+        {
             return BadRequest("License key is required.");
+        }
 
         if (licenseFile == null || licenseFile.Length == 0)
+        {
             return BadRequest("License file is required.");
+        }
 
         using var ms = new MemoryStream();
         await licenseFile.OpenReadStream().CopyToAsync(ms);
@@ -71,7 +77,9 @@ public class LicensesController(LicenseService licenseService) : ControllerBase
     public async Task<IActionResult> RenewLicense([FromBody] RenewLicenseRequest request)
     {
         if (!ModelState.IsValid)
+        {
             return BadRequest(ModelState);
+        }
 
         var result = await licenseService.RenewLicenseAsync(request.LicenseKey, request.NewExpirationDate);
         return result.IsSuccessful ? Ok(result.LicenseFile) : BadRequest(result.Message);
@@ -83,7 +91,9 @@ public class LicensesController(LicenseService licenseService) : ControllerBase
     public async Task<IActionResult> Heartbeat([FromBody] HeartbeatRequest request)
     {
         if (!ModelState.IsValid)
+        {
             return BadRequest(ModelState);
+        }
 
         var result = await licenseService.HeartbeatAsync(request.LicenseKey, request.MachineId);
         return result ? Ok() : NotFound();

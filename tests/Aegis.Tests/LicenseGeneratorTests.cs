@@ -91,13 +91,13 @@ public class LicenseGeneratorTests
         var license = LicenseGenerator.GenerateSubscriptionLicense(userName, subscriptionDuration);
 
         // Assert
-        Assert.NotNull(license);
-        Assert.IsType<SubscriptionLicense>(license);
-        Assert.Equal(userName, license.UserName);
-        Assert.Equal(subscriptionDuration, license.SubscriptionDuration);
-        Assert.Equal(LicenseType.Subscription, license.Type);
-        Assert.Equal(DateTime.UtcNow.Date, license.IssuedOn.Date);
-        Assert.Equal(DateTime.UtcNow.Date, license.SubscriptionStartDate.Date);
+        license.Should().NotBeNull();
+        license.Should().BeOfType<SubscriptionLicense>();
+        license.UserName.Should().Be(userName);
+        license.SubscriptionDuration.Should().Be(subscriptionDuration);
+        license.Type.Should().Be(LicenseType.Subscription);
+        license.IssuedOn.Date.Should().Be(DateTime.UtcNow.Date);
+        license.SubscriptionStartDate.Date.Should().Be(DateTime.UtcNow.Date);
     }
 
     [Fact]
@@ -111,12 +111,12 @@ public class LicenseGeneratorTests
         var license = LicenseGenerator.GenerateFloatingLicense(userName, maxActiveUsersCount);
 
         // Assert
-        Assert.NotNull(license);
-        Assert.IsType<FloatingLicense>(license);
-        Assert.Equal(userName, license.UserName);
-        Assert.Equal(maxActiveUsersCount, license.MaxActiveUsersCount);
-        Assert.Equal(LicenseType.Floating, license.Type);
-        Assert.Equal(DateTime.UtcNow.Date, license.IssuedOn.Date);
+        license.Should().NotBeNull();
+        license.Should().BeOfType<FloatingLicense>();
+        license.UserName.Should().Be(userName);
+        license.MaxActiveUsersCount.Should().Be(maxActiveUsersCount);
+        license.Type.Should().Be(LicenseType.Floating);
+        license.IssuedOn.Date.Should().Be(DateTime.UtcNow.Date);
     }
 
     [Fact]
@@ -130,11 +130,11 @@ public class LicenseGeneratorTests
         var license = LicenseGenerator.GenerateConcurrentLicense(userName, maxActiveUsersCount);
 
         // Assert
-        Assert.NotNull(license);
-        Assert.IsType<ConcurrentLicense>(license);
-        Assert.Equal(userName, license.UserName);
-        Assert.Equal(maxActiveUsersCount, license.MaxActiveUsersCount);
-        Assert.Equal(LicenseType.Concurrent, license.Type);
-        Assert.Equal(DateTime.UtcNow.Date, license.IssuedOn.Date);
+        license.Should().NotBeNull();
+        license.Should().BeOfType<ConcurrentLicense>();
+        license.UserName.Should().Be(userName);
+        license.MaxActiveUsersCount.Should().Be(maxActiveUsersCount);
+        license.Type.Should().Be(LicenseType.Concurrent);
+        license.IssuedOn.Date.Should().Be(DateTime.UtcNow.Date);
     }
 }

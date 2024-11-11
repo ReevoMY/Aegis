@@ -4,6 +4,7 @@ using Aegis.Server.AspNetCore.Data.Context;
 using Aegis.Server.AspNetCore.DTOs;
 using Aegis.Server.AspNetCore.Entities;
 using Aegis.Server.AspNetCore.Services;
+using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -12,9 +13,13 @@ namespace Aegis.Server.AspNetCore.Tests.Controllers;
 
 public class AuthenticationControllerTests
 {
+    #region Fields
+
     private readonly AuthService _authService;
     private readonly AuthenticationController _controller;
     private readonly ApplicationDbContext _dbContext;
+
+    #endregion
 
     // Constructor for setting up the test environment
     public AuthenticationControllerTests()
@@ -39,7 +44,7 @@ public class AuthenticationControllerTests
         _controller = new AuthenticationController(_authService, _dbContext);
     }
 
-    #region Register Tests
+    #region Register
 
     [Fact]
     public async Task Register_ValidRequest_ReturnsOkResult()
@@ -61,14 +66,14 @@ public class AuthenticationControllerTests
         var result = await _controller.Register(registerDto);
 
         // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        Assert.Equal("User registered successfully.", okResult.Value);
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        okResult!.Value.Should().Be("User registered successfully.");
 
         // Verify user is saved in the database
         var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Username == registerDto.Username);
-        Assert.NotNull(user);
-        Assert.Equal(registerDto.Email, user.Email);
-        Assert.True(_authService.VerifyPassword(registerDto.Password, user.PasswordHash));
+        user.Should().NotBeNull();
+        user!.Email.Should().Be(registerDto.Email);
+        _authService.VerifyPassword(registerDto.Password, user.PasswordHash).Should().BeTrue();
     }
 
     [Fact]
@@ -77,7 +82,8 @@ public class AuthenticationControllerTests
         // Arrange
         var existingUser = new User
         {
-            Username = "existinguser", Email = "existing@example.com",
+            Username = "existinguser",
+            Email = "existing@example.com",
             PasswordHash = _authService.HashPassword("password")
         };
         _dbContext.Users.Add(existingUser);
@@ -85,7 +91,9 @@ public class AuthenticationControllerTests
 
         var registerDto = new RegisterDto
         {
-            Username = "existinguser", Email = "newuser@example.com", Password = "newpassword",
+            Username = "existinguser",
+            Email = "newuser@example.com",
+            Password = "newpassword",
             ConfirmPassword = "newpassword"
         };
 
@@ -93,8 +101,8 @@ public class AuthenticationControllerTests
         var result = await _controller.Register(registerDto);
 
         // Assert
-        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal("Username or email is already taken or role does not exist.", badRequestResult.Value);
+        var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        badRequestResult!.Value.Should().Be("Username or email is already taken or role does not exist.");
     }
 
     [Fact]
@@ -103,7 +111,8 @@ public class AuthenticationControllerTests
         // Arrange
         var existingUser = new User
         {
-            Username = "existinguser", Email = "existing@example.com",
+            Username = "existinguser",
+            Email = "existing@example.com",
             PasswordHash = _authService.HashPassword("password")
         };
         _dbContext.Users.Add(existingUser);
@@ -111,7 +120,9 @@ public class AuthenticationControllerTests
 
         var registerDto = new RegisterDto
         {
-            Username = "newuser", Email = "existing@example.com", Password = "newpassword",
+            Username = "newuser",
+            Email = "existing@example.com",
+            Password = "newpassword",
             ConfirmPassword = "newpassword"
         };
 
@@ -119,8 +130,8 @@ public class AuthenticationControllerTests
         var result = await _controller.Register(registerDto);
 
         // Assert
-        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Equal("Username or email is already taken or role does not exist.", badRequestResult.Value);
+        var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        badRequestResult!.Value.Should().Be("Username or email is already taken or role does not exist.");
     }
 
     [Fact]
@@ -129,47 +140,62 @@ public class AuthenticationControllerTests
         // Arrange
         var registerDto = new RegisterDto
         {
-            Username = "testuser", Email = "invalid email", Password = "testpassword", ConfirmPassword = "testpassword",
-            FullName = "Test User", Role = "User"
+            Username = "testuser",
+            Email = "invalid email",
+            Password = "testpassword",
+            ConfirmPassword = "testpassword",
+            FullName = "Test User",
+            Role = "User"
         };
-        _controller.ModelState.AddModelError("Email", "Invalid email format.");
+        var expectedError = new KeyValuePair<string, string>("Email", "Invalid email format.");
+        _controller.ModelState.AddModelError(expectedError.Key, expectedError.Value);
 
         // Act
         var result = await _controller.Register(registerDto);
 
         // Assert
-        Assert.IsType<BadRequestObjectResult>(result);
+        var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        var errors = badRequestResult!.Value.Should().BeOfType<SerializableError>().Subject;
+        errors.Count.Should().Be(1);
+        (errors[expectedError.Key] as string[])![0].Should().Be(expectedError.Value);
     }
 
     #endregion
 
-    #region Login Tests
+    #region Login
 
     [Fact]
     public async Task Login_ValidCredentials_ReturnsOkResultWithJwtToken()
     {
         // Arrange
         var user = new User
-            { Username = "testuser", PasswordHash = _authService.HashPassword("testpassword"), Role = "User" };
+        {
+            Username = "testuser",
+            PasswordHash = _authService.HashPassword("testpassword"),
+            Role = "User"
+        };
         _dbContext.Users.Add(user);
         await _dbContext.SaveChangesAsync();
-
         var loginDto = new LoginDto { Username = "testuser", Password = "testpassword" };
 
         // Act
         var result = await _controller.Login(loginDto);
 
         // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        var jwtTokenDto = Assert.IsType<JwtTokenDto>(okResult.Value);
-        Assert.NotNull(jwtTokenDto);
-        Assert.NotEmpty(jwtTokenDto.AccessToken);
-        Assert.NotEmpty(jwtTokenDto.RefreshToken);
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        var jwtTokenDto = okResult.Value.Should().BeOfType<JwtTokenDto>().Subject;
+        jwtTokenDto.Should().NotBeNull();
+        jwtTokenDto.AccessToken.Should().NotBeNullOrEmpty();
+        jwtTokenDto.RefreshToken.Should().NotBeNullOrEmpty();
 
         // Verify token claims
         var tokenHandler = new JwtSecurityTokenHandler();
         var securityToken = tokenHandler.ReadToken(jwtTokenDto.AccessToken) as JwtSecurityToken;
-        Assert.Equal(user.Id.ToString(), securityToken?.Claims.First(claim => claim.Type == "nameid").Value);
+        securityToken.Should().NotBeNull();
+        var claims = securityToken!.Claims.ToDictionary((claim) => claim.Type, claim => claim.Value);
+        claims[JwtRegisteredClaimNames.NameId].Should().Be(user.Id.ToString());
+        claims[JwtRegisteredClaimNames.UniqueName].Should().Be(user.Username);
+        claims["role"].Should().Be(user.Role);
     }
 
     [Fact]
@@ -177,7 +203,11 @@ public class AuthenticationControllerTests
     {
         // Arrange
         var user = new User
-            { Username = "testuser", PasswordHash = _authService.HashPassword("testpassword"), Role = "User" };
+        {
+            Username = "testuser", 
+            PasswordHash = _authService.HashPassword("testpassword"), 
+            Role = "User"
+        };
         _dbContext.Users.Add(user);
         await _dbContext.SaveChangesAsync();
 
@@ -187,37 +217,43 @@ public class AuthenticationControllerTests
         var result = await _controller.Login(loginDto);
 
         // Assert
-        var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
-        Assert.Equal("Invalid username or password.", unauthorizedResult.Value);
+        var unauthorizedResult = result.Should().BeOfType<UnauthorizedObjectResult>().Subject;
+        unauthorizedResult.Value.Should().Be("Invalid username or password.");
     }
 
     #endregion
 
-    #region RefreshToken Tests
+    #region RefreshToken
 
     [Fact]
     public async Task RefreshToken_ValidRefreshToken_ReturnsOkResultWithNewTokens()
     {
         // Arrange
         var user = new User
-            { Username = "testuser", PasswordHash = _authService.HashPassword("testpassword"), Role = "User" };
+        {
+            Username = "testuser", 
+            PasswordHash = _authService.HashPassword("testpassword"), 
+            Role = "User"
+        };
         _dbContext.Users.Add(user);
         await _dbContext.SaveChangesAsync();
 
         // Generate initial tokens
         var initialTokens = await _authService.GenerateJwtToken(user.Id, user.Username, user.Role);
         var refreshToken = new RefreshTokenDto { Token = initialTokens.RefreshToken };
+        await Task.Delay(1000); // Delay to ensure new tokens are different
 
         // Act
         var result = await _controller.RefreshToken(refreshToken);
 
         // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        var newTokens = Assert.IsType<JwtTokenDto>(okResult.Value);
-        Assert.NotNull(newTokens);
-        Assert.NotEmpty(newTokens.AccessToken);
-        Assert.NotEmpty(newTokens.RefreshToken);
-        Assert.NotEqual(initialTokens.RefreshToken, newTokens.RefreshToken);
+        var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+        var newTokens = okResult.Value.Should().BeOfType<JwtTokenDto>().Subject;
+        newTokens.Should().NotBeNull();
+        newTokens.AccessToken.Should().NotBeNullOrEmpty();
+        newTokens.AccessToken.Should().NotBe(initialTokens.AccessToken);
+        newTokens.RefreshToken.Should().NotBeNullOrEmpty();
+        newTokens.RefreshToken.Should().NotBe(initialTokens.RefreshToken);
     }
 
     [Fact]
@@ -230,29 +266,47 @@ public class AuthenticationControllerTests
         var result = await _controller.RefreshToken(refreshToken);
 
         // Assert
-        var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
-        Assert.Equal("Invalid refresh token.", unauthorizedResult.Value);
+        var unauthorizedResult = result.Should().BeOfType<UnauthorizedObjectResult>().Subject;
+        unauthorizedResult.Value.Should().Be("Invalid refresh token.");
     }
 
     [Fact]
     public async Task RefreshToken_MissingUser_ReturnsUnauthorized()
     {
         // Arrange
-        var refreshTokenDto = new RefreshTokenDto { Token = "some-refresh-token" };
+        var refreshToken = new RefreshTokenDto { Token = "some-refresh-token" };
         _dbContext.RefreshTokens.Add(new RefreshToken
         {
             UserId = Guid.NewGuid(), // Non-existing user
-            Token = refreshTokenDto.Token,
+            Token = refreshToken.Token,
             Expires = DateTime.UtcNow.AddDays(7)
         });
         await _dbContext.SaveChangesAsync();
 
         // Act
-        var result = await _controller.RefreshToken(refreshTokenDto);
+        var result = await _controller.RefreshToken(refreshToken);
 
         // Assert
-        var unauthorizedResult = Assert.IsType<UnauthorizedObjectResult>(result);
-        Assert.Equal("User associated with refresh token not found.", unauthorizedResult.Value);
+        var unauthorizedResult = result.Should().BeOfType<UnauthorizedObjectResult>().Subject;
+        unauthorizedResult.Value.Should().Be("User associated with refresh token not found.");
+    }
+
+    [Fact]
+    public async Task RefreshToken_InvalidModelState_ReturnsBadRequest()
+    {
+        // Arrange
+        var refreshToken = new RefreshTokenDto { Token = "invalid-refresh-token" };
+        var expectedError = new KeyValuePair<string, string>("Token", "Invalid refresh token.");
+        _controller.ModelState.AddModelError(expectedError.Key, expectedError.Value);
+
+        // Act
+        var result = await _controller.RefreshToken(refreshToken);
+
+        // Assert
+        var badRequestResult = result.Should().BeOfType<BadRequestObjectResult>().Subject;
+        var errors = badRequestResult!.Value.Should().BeOfType<SerializableError>().Subject;
+        errors.Count.Should().Be(1);
+        (errors[expectedError.Key] as string[])![0].Should().Be(expectedError.Value);
     }
 
     #endregion

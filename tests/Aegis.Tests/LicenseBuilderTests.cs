@@ -2,32 +2,12 @@
 using Aegis.Exceptions;
 using Aegis.Models;
 using Aegis.Utilities;
+using FluentAssertions;
 
 namespace Aegis.Tests;
 
 public class LicenseBuilderTests
 {
-    // A helper method to create a base license with default values
-    private BaseLicense CreateBaseLicense(LicenseType type = LicenseType.Standard)
-    {
-        BaseLicense license = type switch
-        {
-            LicenseType.Standard => new StandardLicense("TestUser"),
-            LicenseType.Trial => new TrialLicense(TimeSpan.FromDays(7)),
-            LicenseType.NodeLocked => new NodeLockedLicense("TestHardwareId"),
-            LicenseType.Subscription => new SubscriptionLicense("TestUser", TimeSpan.FromDays(30)),
-            LicenseType.Floating => new FloatingLicense("TestUser", 5),
-            LicenseType.Concurrent => new ConcurrentLicense("TestUser", 5),
-            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
-        };
-
-        if (license.Type != LicenseType.Trial)
-            license.WithExpiryDate(DateTime.UtcNow.AddDays(10));
-
-        return license.WithIssuer("Aegis Software").WithFeatures(new Dictionary<string, bool>
-            { { "Feature1", true }, { "Feature2", false } });
-    }
-
     [Fact]
     public void WithExpiryDate_SetsExpirationDateCorrectly_ForStandardLicense()
     {
@@ -39,7 +19,7 @@ public class LicenseBuilderTests
         var license = baseLicense.WithExpiryDate(expectedExpiryDate);
 
         // Assert
-        Assert.Equal(expectedExpiryDate, license.ExpirationDate!.Value.Date);
+        license.ExpirationDate!.Value.Date.Should().Be(expectedExpiryDate);
     }
 
     [Fact]
@@ -50,7 +30,8 @@ public class LicenseBuilderTests
         var expiryDate = DateTime.UtcNow.AddDays(10);
 
         // Act & Assert
-        Assert.Throws<LicenseGenerationException>(() => baseLicense.WithExpiryDate(expiryDate));
+        FluentActions.Invoking(() => baseLicense.WithExpiryDate(expiryDate)).Should()
+            .Throw<LicenseGenerationException>();
     }
 
     [Fact]
@@ -63,8 +44,8 @@ public class LicenseBuilderTests
         var license = baseLicense.WithFeature("TestFeature", true);
 
         // Assert
-        Assert.True(license.Features.ContainsKey("TestFeature"));
-        Assert.True(license.Features["TestFeature"]);
+        license.Features.ContainsKey("TestFeature").Should().BeTrue();
+        license.Features["TestFeature"].Should().BeTrue();
     }
 
     [Fact]
@@ -78,8 +59,8 @@ public class LicenseBuilderTests
         var license = baseLicense.WithFeature("TestFeature", true);
 
         // Assert
-        Assert.True(license.Features.ContainsKey("TestFeature"));
-        Assert.True(license.Features["TestFeature"]);
+        license.Features.ContainsKey("TestFeature").Should().BeTrue();
+        license.Features["TestFeature"].Should().BeTrue();
     }
 
     [Fact]
@@ -97,7 +78,7 @@ public class LicenseBuilderTests
         var license = baseLicense.WithFeatures(features);
 
         // Assert
-        Assert.Equal(features, license.Features);
+        license.Features.Should().BeEquivalentTo(features);
     }
 
     [Fact]
@@ -111,7 +92,7 @@ public class LicenseBuilderTests
         var license = baseLicense.WithIssuer(issuer);
 
         // Assert
-        Assert.Equal(issuer, license.Issuer);
+        license.Issuer.Should().Be(issuer);
     }
 
     [Fact]
@@ -125,7 +106,7 @@ public class LicenseBuilderTests
         var license = baseLicense.WithLicenseKey(licenseKey);
 
         // Assert
-        Assert.Equal(licenseKey, license.LicenseKey);
+        license.LicenseKey.Should().Be(licenseKey);
     }
 
     [Fact]
@@ -143,18 +124,45 @@ public class LicenseBuilderTests
 
         // Assert
         var licenseData = await File.ReadAllBytesAsync(filePath);
-        Assert.NotEmpty(licenseData);
+        licenseData.Should().NotBeNullOrEmpty();
+
         var license = await LicenseManager.LoadLicenseAsync(licenseData);
-        Assert.NotNull(license);
-        Assert.Equal(baseLicense.Type, license.Type);
-        Assert.Equal(baseLicense.Issuer, license.Issuer);
-        Assert.Equal(baseLicense.LicenseKey, license.LicenseKey);
-        Assert.Equal(baseLicense.Features, license.Features);
-        Assert.Equal(baseLicense.ExpirationDate, license.ExpirationDate);
-        Assert.Equal(baseLicense.IssuedOn, license.IssuedOn);
-        Assert.Equal(baseLicense.LicenseId, license.LicenseId);
+        license.Should().NotBeNull();
+        license!.Type.Should().Be(baseLicense.Type);
+        license.Issuer.Should().Be(baseLicense.Issuer);
+        license.LicenseId.Should().Be(baseLicense.LicenseId);
+        license.LicenseKey.Should().Be(baseLicense.LicenseKey);
+        license.Features.Should().BeEquivalentTo(baseLicense.Features);
+        license.ExpirationDate!.Value.Date.Should().Be(baseLicense.ExpirationDate!.Value.Date);
+        license.IssuedOn.Date.Should().Be(baseLicense.IssuedOn.Date);
 
         // Clean up
         File.Delete(filePath);
     }
+
+    #region Private
+
+    private BaseLicense CreateBaseLicense(LicenseType type = LicenseType.Standard)
+    {
+        BaseLicense license = type switch
+        {
+            LicenseType.Standard => new StandardLicense("TestUser"),
+            LicenseType.Trial => new TrialLicense(TimeSpan.FromDays(7)),
+            LicenseType.NodeLocked => new NodeLockedLicense("TestHardwareId"),
+            LicenseType.Subscription => new SubscriptionLicense("TestUser", TimeSpan.FromDays(30)),
+            LicenseType.Floating => new FloatingLicense("TestUser", 5),
+            LicenseType.Concurrent => new ConcurrentLicense("TestUser", 5),
+            _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
+        };
+
+        if (license.Type != LicenseType.Trial)
+            license.WithExpiryDate(DateTime.UtcNow.AddDays(10));
+
+        return license.WithIssuer("Aegis Software").WithFeatures(new Dictionary<string, bool>
+        {
+            { "Feature1", true }, { "Feature2", false }
+        });
+    }
+
+    #endregion
 }

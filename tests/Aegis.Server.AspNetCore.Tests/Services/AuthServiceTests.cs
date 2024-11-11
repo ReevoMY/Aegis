@@ -5,6 +5,7 @@ using Aegis.Server.AspNetCore.Data.Context;
 using Aegis.Server.AspNetCore.DTOs;
 using Aegis.Server.AspNetCore.Entities;
 using Aegis.Server.AspNetCore.Services;
+using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -13,9 +14,13 @@ namespace Aegis.Server.AspNetCore.Tests.Services;
 
 public class AuthServiceTests
 {
+    #region Fields
+
     private readonly AuthService _authService;
     private readonly ApplicationDbContext _dbContext;
     private readonly IOptions<JwtSettings> _jwtSettings;
+
+    #endregion
 
     public AuthServiceTests()
     {
@@ -35,7 +40,7 @@ public class AuthServiceTests
         _authService = new AuthService(_dbContext, _jwtSettings);
     }
 
-    #region GenerateRefreshToken Tests
+    #region GenerateRefreshToken
 
     [Fact]
     public void GenerateRefreshToken_ReturnsUniqueToken()
@@ -45,12 +50,12 @@ public class AuthServiceTests
         var token2 = _authService.GenerateRefreshToken();
 
         // Assert
-        Assert.NotEqual(token1, token2);
+        token1.Should().NotBe(token2);
     }
 
     #endregion
 
-    #region LoginUserAsync Tests
+    #region LoginUserAsync
 
     [Fact]
     public async Task LoginUserAsync_ValidCredentials_ReturnsJwtTokenDto()
@@ -66,15 +71,18 @@ public class AuthServiceTests
         await _dbContext.SaveChangesAsync();
 
         // Act
-        var result =
-            await _authService.LoginUserAsync(new LoginDto { Username = "testuser", Password = "testpassword" });
+        var result = await _authService.LoginUserAsync(new LoginDto
+        {
+            Username = "testuser",
+            Password = "testpassword"
+        });
 
         // Assert
-        Assert.NotNull(result);
-        Assert.NotEmpty(result.AccessToken);
-        Assert.NotEmpty(result.RefreshToken);
-        Assert.True(result.AccessTokenExpiration > DateTime.UtcNow);
-        Assert.True(result.RefreshTokenExpiration > DateTime.UtcNow);
+        result.Should().NotBeNull();
+        result!.AccessToken.Should().NotBeNullOrEmpty();
+        result.RefreshToken.Should().NotBeNullOrEmpty();
+        result.AccessTokenExpiration.Should().BeAfter(DateTime.UtcNow);
+        result.RefreshTokenExpiration.Should().BeAfter(DateTime.UtcNow);
     }
 
     [Fact]
@@ -82,10 +90,13 @@ public class AuthServiceTests
     {
         // Act
         var result = await _authService.LoginUserAsync(new LoginDto
-            { Username = "nonexistentuser", Password = "testpassword" });
+        {
+            Username = "nonexistentuser",
+            Password = "testpassword"
+        });
 
         // Assert
-        Assert.Null(result);
+        result.Should().BeNull();
     }
 
     [Fact]
@@ -102,16 +113,19 @@ public class AuthServiceTests
         await _dbContext.SaveChangesAsync();
 
         // Act
-        var result =
-            await _authService.LoginUserAsync(new LoginDto { Username = "testuser", Password = "wrongpassword" });
+        var result = await _authService.LoginUserAsync(new LoginDto
+        {
+            Username = "testuser",
+            Password = "wrongpassword"
+        });
 
         // Assert
-        Assert.Null(result);
+        result.Should().BeNull();
     }
 
     #endregion
 
-    #region RegisterAsync Tests
+    #region RegisterAsync
 
     [Fact]
     public async Task RegisterAsync_UniqueCredentials_ReturnsTrueAndSavesUser()
@@ -133,33 +147,45 @@ public class AuthServiceTests
         var result = await _authService.RegisterAsync(newUser);
 
         // Assert
-        Assert.True(result);
+        result.Should().BeTrue();
         var savedUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.Username == newUser.Username);
-        Assert.NotNull(savedUser);
+        savedUser.Should().NotBeNull();
     }
 
     [Fact]
     public async Task RegisterAsync_ExistingUsername_ReturnsFalse()
     {
         // Arrange
-        var existingUser = new User { Username = "existinguser", Email = "existing@example.com" };
+        var existingUser = new User
+        {
+            Username = "existinguser", 
+            Email = "existing@example.com"
+        };
         _dbContext.Users.Add(existingUser);
         await _dbContext.SaveChangesAsync();
 
-        var newUser = new RegisterDto { Username = "existinguser", Email = "newuser@example.com" };
+        var newUser = new RegisterDto
+        {
+            Username = "existinguser", 
+            Email = "newuser@example.com"
+        };
 
         // Act
         var result = await _authService.RegisterAsync(newUser);
 
         // Assert
-        Assert.False(result);
+        result.Should().BeFalse();
     }
 
     [Fact]
     public async Task RegisterAsync_ExistingEmail_ReturnsFalse()
     {
         // Arrange
-        var existingUser = new User { Username = "existinguser", Email = "existing@example.com" };
+        var existingUser = new User
+        {
+            Username = "existinguser", 
+            Email = "existing@example.com"
+        };
         _dbContext.Users.Add(existingUser);
         await _dbContext.SaveChangesAsync();
 
@@ -169,12 +195,12 @@ public class AuthServiceTests
         var result = await _authService.RegisterAsync(newUser);
 
         // Assert
-        Assert.False(result);
+        result.Should().BeFalse();
     }
 
     #endregion
 
-    #region GenerateJwtToken Tests
+    #region GenerateJwtToken
 
     [Fact]
     public async Task GenerateJwtToken_ReturnsValidJwtTokenDto()
@@ -186,17 +212,19 @@ public class AuthServiceTests
         var result = await _authService.GenerateJwtToken(userId, "testuser", "User");
 
         // Assert
-        Assert.NotNull(result);
-        Assert.NotEmpty(result.AccessToken);
-        Assert.NotEmpty(result.RefreshToken);
-        Assert.True(result.AccessTokenExpiration > DateTime.UtcNow);
-        Assert.True(result.RefreshTokenExpiration > DateTime.UtcNow);
+        result.Should().NotBeNull();
+        result!.AccessToken.Should().NotBeNullOrEmpty();
+        result.RefreshToken.Should().NotBeNullOrEmpty();
+        result.AccessTokenExpiration.Should().BeAfter(DateTime.UtcNow);
+        result.RefreshTokenExpiration.Should().BeAfter(DateTime.UtcNow);
 
         // Verify token claims
         var claims = await _authService.ValidateTokenAsync(result.AccessToken);
-        Assert.Equal(userId.ToString(), claims?.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
-        Assert.Equal("testuser", claims?.Claims.First(c => c.Type == ClaimTypes.Name).Value);
-        Assert.Equal("User", claims?.Claims.First(c => c.Type == ClaimTypes.Role).Value);
+        var claimsDict = claims?.Claims.ToDictionary(claim => claim.Type, claim => claim.Value);
+        claimsDict.Should().NotBeNullOrEmpty();
+        claimsDict![ClaimTypes.NameIdentifier].Should().Be(userId.ToString());
+        claimsDict[ClaimTypes.Name].Should().Be("testuser");
+        claimsDict[ClaimTypes.Role].Should().Be("User");
     }
 
     [Fact]
@@ -206,11 +234,11 @@ public class AuthServiceTests
         var userId = Guid.NewGuid();
 
         // Act
-        _authService.GenerateJwtToken(userId, "testuser", "User");
+        await _authService.GenerateJwtToken(userId, "testuser", "User");
 
         // Assert
         var refreshToken = await _dbContext.RefreshTokens.FirstOrDefaultAsync(rt => rt.UserId == userId);
-        Assert.NotNull(refreshToken);
+        refreshToken.Should().NotBeNull();
     }
 
     #endregion
@@ -228,10 +256,12 @@ public class AuthServiceTests
         var result = await _authService.ValidateTokenAsync(token);
 
         // Assert
-        Assert.NotNull(result);
-        Assert.Equal(userId.ToString(), result.Claims.First(c => c.Type == ClaimTypes.NameIdentifier).Value);
-        Assert.Equal("testuser", result.Claims.First(c => c.Type == ClaimTypes.Name).Value);
-        Assert.Equal("User", result.Claims.First(c => c.Type == ClaimTypes.Role).Value);
+        result.Should().NotBeNull();
+        var claimsDict = result!.Claims.ToDictionary(claim => claim.Type, claim => claim.Value);
+        claimsDict.Should().NotBeNullOrEmpty();
+        claimsDict![ClaimTypes.NameIdentifier].Should().Be(userId.ToString());
+        claimsDict[ClaimTypes.Name].Should().Be("testuser");
+        claimsDict[ClaimTypes.Role].Should().Be("User");
     }
 
     [Fact]
@@ -248,9 +278,11 @@ public class AuthServiceTests
                 new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
 
-        // Act & Assert
-        await Assert.ThrowsAnyAsync<Exception>(async () =>
-            await _authService.ValidateTokenAsync(tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor))));
+        // Act
+        var act = async () => await _authService.ValidateTokenAsync(tokenHandler.WriteToken(tokenHandler.CreateToken(tokenDescriptor)));
+
+        // Assert
+        await act.Should().ThrowAsync<Exception>();
     }
 
     [Fact]
@@ -263,7 +295,7 @@ public class AuthServiceTests
         var result = await _authService.ValidateTokenAsync(invalidToken);
 
         // Assert
-        Assert.Null(result);
+        result.Should().BeNull();
     }
 
     #endregion

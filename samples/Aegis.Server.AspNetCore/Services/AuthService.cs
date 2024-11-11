@@ -1,5 +1,4 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
-using System.Runtime.CompilerServices;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
@@ -11,33 +10,23 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-[assembly: InternalsVisibleTo("Aegis.Server.AspNetCore.Tests")]
-
 namespace Aegis.Server.AspNetCore.Services;
 
-public class AuthService(ApplicationDbContext dbContext, IOptions<JwtSettings> options)
+public class AuthService(ApplicationDbContext dbContext, IOptions<JwtSettings> options) : IAuthService
 {
-    /// <summary>
-    ///     Authenticates a user and generates a JWT token if successful.
-    /// </summary>
-    /// <param name="login">The login credentials.</param>
-    /// <returns>The JWT token DTO containing the access token, and expiration time, or null if authentication failed.</returns>
     public async Task<JwtTokenDto?> LoginUserAsync(LoginDto login)
     {
         var user = await dbContext.Users.Where(x => x.Username == login.Username).FirstOrDefaultAsync();
-        if (user == null || !VerifyPassword(login.Password, user.PasswordHash)) return null;
+        if (user == null || !VerifyPassword(login.Password, user.PasswordHash))
+        {
+            return null;
+        }
 
         var token = await GenerateJwtToken(user.Id, user.Username, user.Role);
-
 
         return token;
     }
 
-    /// <summary>
-    ///     Registers a new user.
-    /// </summary>
-    /// <param name="newUser">The new user registration details.</param>
-    /// <returns>True if registration was successful, false otherwise.</returns>
     public async Task<bool> RegisterAsync(RegisterDto newUser)
     {
         if (newUser.Password != newUser.ConfirmPassword ||
@@ -59,13 +48,6 @@ public class AuthService(ApplicationDbContext dbContext, IOptions<JwtSettings> o
         return true;
     }
 
-    /// <summary>
-    ///     Generates a JWT and refresh token for a given user.
-    /// </summary>
-    /// <param name="userId">The ID of the user.</param>
-    /// <param name="userName">The username of the user.</param>
-    /// <param name="role">The role of the user.</param>
-    /// <returns>The JWT token DTO containing the access token, refresh token, and expiration times.</returns>
     public async Task<JwtTokenDto> GenerateJwtToken(Guid userId, string userName, string role)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -127,23 +109,6 @@ public class AuthService(ApplicationDbContext dbContext, IOptions<JwtSettings> o
         };
     }
 
-    /// <summary>
-    ///     Generates a random refresh token.
-    /// </summary>
-    /// <returns>The generated refresh token.</returns>
-    internal string GenerateRefreshToken()
-    {
-        var randomNumber = new byte[32];
-        using var rng = RandomNumberGenerator.Create();
-        rng.GetBytes(randomNumber);
-        return Convert.ToBase64String(randomNumber);
-    }
-
-    /// <summary>
-    ///     Validates a JWT token and returns the associated ClaimsPrincipal if valid.
-    /// </summary>
-    /// <param name="token">The JWT token to validate.</param>
-    /// <returns>The ClaimsPrincipal associated with the token, or null if the token is invalid.</returns>
     public Task<ClaimsPrincipal?> ValidateTokenAsync(string token)
     {
         try
@@ -166,6 +131,20 @@ public class AuthService(ApplicationDbContext dbContext, IOptions<JwtSettings> o
         {
             return Task.FromResult<ClaimsPrincipal>(null!)!;
         }
+    }
+
+    #region Private
+
+    /// <summary>
+    ///     Generates a random refresh token.
+    /// </summary>
+    /// <returns>The generated refresh token.</returns>
+    internal string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[32];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
     }
 
     /// <summary>
@@ -193,4 +172,6 @@ public class AuthService(ApplicationDbContext dbContext, IOptions<JwtSettings> o
     {
         return HashPassword(password) == hashedPassword;
     }
+
+    #endregion
 }
