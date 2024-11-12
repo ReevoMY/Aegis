@@ -25,8 +25,10 @@ public class LicensesController(LicenseService licenseService) : ControllerBase
 
     [HttpPost("validate")]
     [AuthorizeMiddleware(["Admin", "User"])]
-    public async Task<IActionResult> Validate([FromForm] string licenseKey, [FromForm] string validationParams = "{}",
-        [FromForm] IFormFile? licenseFile = null)
+    public async Task<IActionResult> Validate(
+        [FromForm] string licenseKey,
+        [FromForm] string validationParams = "{}",
+        IFormFile? licenseFile = null)
     {
         if (string.IsNullOrEmpty(licenseKey))
         {
