@@ -1,9 +1,10 @@
 ﻿using Aegis.Server.AspNetCore.DTOs;
 using System.Security.Claims;
+using Volo.Abp.Application.Services;
 
 namespace Aegis.Server.AspNetCore.Services;
 
-public interface IAuthService
+public interface IAuthService : IApplicationService
 {
     /// <summary>
     ///     Authenticates a user and generates a JWT token if successful.

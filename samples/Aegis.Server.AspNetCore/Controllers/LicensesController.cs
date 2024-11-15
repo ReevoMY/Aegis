@@ -3,12 +3,13 @@ using Aegis.Server.AspNetCore.Attributes;
 using Aegis.Server.DTOs;
 using Aegis.Server.Services;
 using Microsoft.AspNetCore.Mvc;
+using Volo.Abp.AspNetCore.Mvc;
 
 namespace Aegis.Server.AspNetCore.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class LicensesController(LicenseService licenseService) : ControllerBase
+public class LicensesController(LicenseService licenseService) : AbpController
 {
     [HttpPost("generate")]
     [AuthorizeMiddleware(["Admin"])]

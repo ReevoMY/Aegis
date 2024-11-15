@@ -249,7 +249,7 @@ public class LicenseServiceTests
         result.IsSuccessful.Should().BeTrue();
         result.Exception.Should().BeNull();
 
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.Id);
         updatedLicense!.Status.Should().Be(LicenseStatus.Active);
     }
 
@@ -266,7 +266,7 @@ public class LicenseServiceTests
         result.IsSuccessful.Should().BeTrue();
         result.Exception.Should().BeNull();
 
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.Id);
         updatedLicense!.Status.Should().Be(LicenseStatus.Active);
     }
 
@@ -284,7 +284,7 @@ public class LicenseServiceTests
         result.IsSuccessful.Should().BeTrue();
         result.Exception.Should().BeNull();
 
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.Id);
         updatedLicense!.Status.Should().Be(LicenseStatus.Active);
         updatedLicense.HardwareId.Should().Be(hardwareId);
     }
@@ -303,11 +303,11 @@ public class LicenseServiceTests
         result.IsSuccessful.Should().BeTrue();
         result.Exception.Should().BeNull();
 
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.Id);
         updatedLicense!.Status.Should().Be(LicenseStatus.Active);
         updatedLicense.ActiveUsersCount.Should().Be(1);
 
-        var activation = await _dbContext.Activations.FirstOrDefaultAsync(a => a.LicenseId == license.LicenseId);
+        var activation = await _dbContext.Activations.FirstOrDefaultAsync(a => a.LicenseId == license.Id);
         activation.Should().NotBeNull();
         activation!.MachineId.Should().Be(hardwareId);
     }
@@ -327,7 +327,7 @@ public class LicenseServiceTests
         result.IsSuccessful.Should().BeFalse();
         result.Exception.Should().BeOfType<MaximumActivationsReachedException>();
 
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.Id);
         updatedLicense!.ActiveUsersCount.Should().Be(1);
     }
 
@@ -345,11 +345,11 @@ public class LicenseServiceTests
         result.IsSuccessful.Should().BeTrue();
         result.Exception.Should().BeNull();
 
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.Id);
         updatedLicense!.Status.Should().Be(LicenseStatus.Active);
         updatedLicense.ActiveUsersCount.Should().Be(1);
 
-        var activation = await _dbContext.Activations.FirstOrDefaultAsync(a => a.LicenseId == license.LicenseId);
+        var activation = await _dbContext.Activations.FirstOrDefaultAsync(a => a.LicenseId == license.Id);
         activation.Should().NotBeNull();
         activation!.MachineId.Should().Be(hardwareId);
     }
@@ -369,7 +369,7 @@ public class LicenseServiceTests
         result.IsSuccessful.Should().BeFalse();
         result.Exception.Should().BeOfType<MaximumActivationsReachedException>();
 
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.Id);
         updatedLicense!.ActiveUsersCount.Should().Be(1);
     }
 
@@ -386,7 +386,7 @@ public class LicenseServiceTests
         result.IsSuccessful.Should().BeTrue();
         result.Exception.Should().BeNull();
 
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.Id);
         updatedLicense!.Status.Should().Be(LicenseStatus.Active);
     }
 
@@ -432,7 +432,7 @@ public class LicenseServiceTests
         result.IsSuccessful.Should().BeTrue();
         result.Exception.Should().BeNull();
 
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.Id);
         updatedLicense!.Status.Should().Be(LicenseStatus.Revoked);
     }
 
@@ -449,7 +449,7 @@ public class LicenseServiceTests
         result.IsSuccessful.Should().BeTrue();
         result.Exception.Should().BeNull();
 
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.Id);
         updatedLicense!.Status.Should().Be(LicenseStatus.Revoked);
     }
 
@@ -467,7 +467,7 @@ public class LicenseServiceTests
         result.IsSuccessful.Should().BeTrue();
         result.Exception.Should().BeNull();
 
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.Id);
         updatedLicense!.Status.Should().Be(LicenseStatus.Revoked);
         updatedLicense.HardwareId.Should().BeNull();
     }
@@ -487,10 +487,10 @@ public class LicenseServiceTests
         result.IsSuccessful.Should().BeTrue();
         result.Exception.Should().BeNull();
 
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.Id);
         updatedLicense!.ActiveUsersCount.Should().Be(0);
 
-        var activation = await _dbContext.Activations.FirstOrDefaultAsync(a => a.LicenseId == license.LicenseId);
+        var activation = await _dbContext.Activations.FirstOrDefaultAsync(a => a.LicenseId == license.Id);
         activation.Should().BeNull();
     }
 
@@ -509,10 +509,10 @@ public class LicenseServiceTests
         result.IsSuccessful.Should().BeTrue();
         result.Exception.Should().BeNull();
 
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.Id);
         updatedLicense!.ActiveUsersCount.Should().Be(0);
 
-        var activation = await _dbContext.Activations.FirstOrDefaultAsync(a => a.LicenseId == license.LicenseId);
+        var activation = await _dbContext.Activations.FirstOrDefaultAsync(a => a.LicenseId == license.Id);
         activation.Should().BeNull();
     }
 
@@ -529,7 +529,7 @@ public class LicenseServiceTests
         result.IsSuccessful.Should().BeTrue();
         result.Exception.Should().BeNull();
 
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.Id);
         updatedLicense!.Status.Should().Be(LicenseStatus.Revoked);
     }
 
@@ -565,10 +565,10 @@ public class LicenseServiceTests
         result.IsSuccessful.Should().BeTrue();
         result.Exception.Should().BeNull();
 
-        var updatedLicense = await _dbContext.Licenses.FindAsync(license.LicenseId);
+        var updatedLicense = await _dbContext.Licenses.FindAsync(license.Id);
         updatedLicense!.ActiveUsersCount.Should().Be(0);
 
-        var activation = await _dbContext.Activations.FirstOrDefaultAsync(a => a.LicenseId == license.LicenseId);
+        var activation = await _dbContext.Activations.FirstOrDefaultAsync(a => a.LicenseId == license.Id);
         activation.Should().BeNull();
     }
 
@@ -666,7 +666,7 @@ public class LicenseServiceTests
         var license = CreateAndSaveLicense(LicenseType.Concurrent, maxActivations: 5);
         const string hardwareId = "12345678";
         await _licenseService.ActivateLicenseAsync(license.LicenseKey, hardwareId);
-        var activation = await _dbContext.Activations.FirstAsync(a => a.LicenseId == license.LicenseId);
+        var activation = await _dbContext.Activations.FirstAsync(a => a.LicenseId == license.Id);
         var initialHeartbeat = activation.LastHeartbeat;
         await Task.Delay(100);
 
@@ -676,7 +676,7 @@ public class LicenseServiceTests
         // Assert
         result.Should().BeTrue();
 
-        var updatedActivation = await _dbContext.Activations.FirstAsync(a => a.LicenseId == license.LicenseId);
+        var updatedActivation = await _dbContext.Activations.FirstAsync(a => a.LicenseId == license.Id);
         updatedActivation.LastHeartbeat.Should().BeAfter(initialHeartbeat);
     }
 
@@ -747,7 +747,7 @@ public class LicenseServiceTests
     {
         var baseLicense = new BaseLicense
         {
-            LicenseId = license.LicenseId,
+            LicenseId = license.Id,
             LicenseKey = license.LicenseKey,
             Type = license.Type,
             IssuedOn = license.IssuedOn,

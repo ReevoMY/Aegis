@@ -27,7 +27,7 @@ public class AuthorizeMiddlewareAttribute(bool allowAnonymous, params string[] r
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
         var httpContext = context.HttpContext;
-        var authService = httpContext.RequestServices.GetRequiredService<AuthService>();
+        var authService = httpContext.RequestServices.GetRequiredService<IAuthService>();
         var dbContext = httpContext.RequestServices.GetRequiredService<ApplicationDbContext>();
         var middleware =
             new AuthorizationMiddleware(async _ => await next(), authService, dbContext, Roles, AllowAnonymous);

@@ -84,11 +84,12 @@ public static class LicenseManager
 
         // Generate the file bytes for the license object
         var licenseData = JsonSerializer.SerializeToUtf8Bytes(license, new JsonSerializerOptions { WriteIndented = true });
-        var aesKey = SecurityUtils.GenerateAesKey();
+        var aesKey = SecurityUtils.GenerateAesKey(); // add passphrase or use Bytedash.Cryptography
         var encryptedData = SecurityUtils.EncryptData(licenseData, aesKey);
         var hash = SecurityUtils.CalculateSha256Hash(encryptedData);
+        var hardwareId = HardwareUtils.GetHardwareId();
         var signature = SecurityUtils.SignData(hash, privateKey ?? LicenseUtils.GetLicensingSecrets().PrivateKey);
-        var combinedLicenseData = CombineLicenseData(hash, signature, encryptedData, aesKey);
+        var combinedLicenseData = CombineLicenseData(hash, signature, encryptedData, aesKey); // Exclude hash and aesKey (hardwareId)
 
         // Output to file if available
         if (filePath != null)

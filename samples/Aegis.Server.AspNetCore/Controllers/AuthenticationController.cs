@@ -3,12 +3,13 @@ using Aegis.Server.AspNetCore.DTOs;
 using Aegis.Server.AspNetCore.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Volo.Abp.AspNetCore.Mvc;
 
 namespace Aegis.Server.AspNetCore.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class AuthenticationController(IAuthService authService, ApplicationDbContext dbContext) : ControllerBase
+public class AuthenticationController(IAuthService authService, ApplicationDbContext dbContext) : AbpController
 {
     /// <summary>
     ///     Registers a new user.

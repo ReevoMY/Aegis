@@ -10,7 +10,7 @@ namespace Aegis.Server.AspNetCore.Middlewares;
 /// </summary>
 public class AuthorizationMiddleware(
     RequestDelegate next,
-    AuthService authService,
+    IAuthService authService,
     ApplicationDbContext dbContext,
     string[] roles,
     bool allowAnonymous = false)

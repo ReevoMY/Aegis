@@ -29,4 +29,6 @@ public class BaseLicense
     [JsonInclude] public Dictionary<string, bool> Features { get; protected internal set; } = new();
 
     [JsonInclude] public string Issuer { get; protected internal set; } = string.Empty;
+
+    [JsonInclude] public string Description { get; protected internal set; } = string.Empty;
 }

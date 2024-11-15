@@ -9,10 +9,11 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Volo.Abp.Application.Services;
 
 namespace Aegis.Server.AspNetCore.Services;
 
-public class AuthService(ApplicationDbContext dbContext, IOptions<JwtSettings> options) : IAuthService
+public class AuthService(ApplicationDbContext dbContext, IOptions<JwtSettings> options) : ApplicationService, IAuthService
 {
     public async Task<JwtTokenDto?> LoginUserAsync(LoginDto login)
     {

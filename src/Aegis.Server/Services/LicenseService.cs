@@ -93,7 +93,7 @@ public class LicenseService(AegisDbContext dbContext)
 
             // Basic license information validation
             if (loadedLicense.Type != license.Type ||
-                loadedLicense.LicenseId != license.LicenseId ||
+                loadedLicense.LicenseId != license.Id ||
                 loadedLicense.IssuedOn != license.IssuedOn)
                 return new LicenseValidationResult(false, null,
                     new LicenseValidationException("License file does not match the stored license."));
@@ -181,13 +181,13 @@ public class LicenseService(AegisDbContext dbContext)
                     await dbContext.SaveChangesAsync(); // Acquire lock
 
                     var currentActiveUsers = await dbContext.Activations
-                        .CountAsync(a => a.LicenseId == license.LicenseId);
+                        .CountAsync(a => a.LicenseId == license.Id);
 
                     if (currentActiveUsers < license.MaxActiveUsersCount)
                     {
                         dbContext.Activations.Add(new Activation
                         {
-                            LicenseId = license.LicenseId,
+                            LicenseId = license.Id,
                             MachineId = hardwareId!,
                             ActivationDate = DateTime.UtcNow,
                             LastHeartbeat = DateTime.UtcNow
@@ -216,13 +216,13 @@ public class LicenseService(AegisDbContext dbContext)
                 break;
             case LicenseType.Floating:
                 var activeActivations = await dbContext.Activations
-                    .CountAsync(a => a.LicenseId == license.LicenseId);
+                    .CountAsync(a => a.LicenseId == license.Id);
 
                 if (activeActivations < license.MaxActiveUsersCount)
                 {
                     dbContext.Activations.Add(new Activation
                     {
-                        LicenseId = license.LicenseId,
+                        LicenseId = license.Id,
                         UserId = license.UserId,
                         MachineId = hardwareId!,
                         ActivationDate = DateTime.UtcNow
@@ -478,7 +478,7 @@ public class LicenseService(AegisDbContext dbContext)
     {
         return new BaseLicense
         {
-            LicenseId = license.LicenseId,
+            LicenseId = license.Id,
             LicenseKey = license.LicenseKey,
             Type = license.Type,
             IssuedOn = license.IssuedOn,
