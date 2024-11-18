@@ -5,7 +5,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using Aegis.Enums;
+using Reevo.License.Domain.Shared.Enum;
 using Aegis.Exceptions;
 using Aegis.Models;
 using Aegis.Server.AspNetCore.Attributes;
@@ -1103,7 +1103,7 @@ public class LicensesControllerTests
     {
         var productId = _dbContext.Products.First().ProductId;
         var licenseFeature = _dbContext.LicenseFeatures.First();
-        var license = new License
+        var license = new MyLicense
         {
             Type = licenseType,
             ProductId = productId,

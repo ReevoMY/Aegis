@@ -25,6 +25,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aegis.Sample.Validation.Dat
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ByteDash.LicenseServer", "samples\ByteDash.LicenseServer\ByteDash.LicenseServer.csproj", "{2AA9FB34-10DF-4DB3-8C81-A4C6A8E8A8B9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reevo.License.Domain.Shared", "src\Reevo.License.Domain.Shared\Reevo.License.Domain.Shared.csproj", "{B8DCF89C-EC9B-4F3C-B815-3F59CB07993C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{2AA9FB34-10DF-4DB3-8C81-A4C6A8E8A8B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2AA9FB34-10DF-4DB3-8C81-A4C6A8E8A8B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2AA9FB34-10DF-4DB3-8C81-A4C6A8E8A8B9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B8DCF89C-EC9B-4F3C-B815-3F59CB07993C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B8DCF89C-EC9B-4F3C-B815-3F59CB07993C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B8DCF89C-EC9B-4F3C-B815-3F59CB07993C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B8DCF89C-EC9B-4F3C-B815-3F59CB07993C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -76,5 +82,6 @@ Global
 		{4C205CAD-03F6-46B5-B963-C7F181E9CD10} = {3B4518B1-BE92-40B8-A2D1-ABB73DF6FAC6}
 		{89ED0BAB-6CE3-4162-BEE5-67408451CEF9} = {3B4518B1-BE92-40B8-A2D1-ABB73DF6FAC6}
 		{2AA9FB34-10DF-4DB3-8C81-A4C6A8E8A8B9} = {3B4518B1-BE92-40B8-A2D1-ABB73DF6FAC6}
+		{B8DCF89C-EC9B-4F3C-B815-3F59CB07993C} = {9BB04FC3-081B-4A3F-B1BC-2D82C25F3975}
 	EndGlobalSection
 EndGlobal

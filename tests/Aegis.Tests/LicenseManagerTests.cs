@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using System.Text.Json;
-using Aegis.Enums;
+using Reevo.License.Domain.Shared.Enum;
 using Aegis.Exceptions;
 using Aegis.Models;
 using Aegis.Models.Utils;
@@ -142,7 +142,7 @@ public class LicenseManagerTests
     public async Task LoadLicenseAsync_ThrowsExceptionForNullFilePath()
     {
         // Act
-        var act = async () => await LicenseManager.LoadLicenseAsync(null!, ValidationMode.Offline);
+        var act = async () => await LicenseManager.LoadLicenseAsync(null!, ActivationMode.Offline);
 
         // Assert
         await act.Should().ThrowAsync<ArgumentNullException>();

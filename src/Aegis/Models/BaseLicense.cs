@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
-using Aegis.Enums;
+using Reevo.License.Domain.Shared.Enum;
 
 [assembly: InternalsVisibleTo("Aegis.Server")]
 [assembly: InternalsVisibleTo("Aegis.Server.Tests")]

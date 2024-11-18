@@ -1,4 +1,4 @@
-﻿using Aegis.Enums;
+﻿using Reevo.License.Domain.Shared.Enum;
 using Aegis.Exceptions;
 using Aegis.Models;
 using Aegis.Server.Data;
@@ -80,7 +80,7 @@ public class LicenseService(AegisDbContext dbContext)
 
             try
             {
-                loadedLicense = await LicenseManager.LoadLicenseAsync(licenseFile, ValidationMode.Offline, validationParams);
+                loadedLicense = await LicenseManager.LoadLicenseAsync(licenseFile, ActivationMode.Offline, validationParams);
             }
             catch (Exception e)
             {

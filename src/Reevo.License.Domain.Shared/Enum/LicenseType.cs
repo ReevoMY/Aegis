@@ -1,4 +1,4 @@
-﻿namespace Aegis.Enums;
+﻿namespace Reevo.License.Domain.Shared.Enum;
 
 public enum LicenseType
 {

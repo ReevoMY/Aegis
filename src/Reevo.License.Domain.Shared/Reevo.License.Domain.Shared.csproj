@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Volo.Abp.AuditLogging.Domain.Shared" Version="9.0.0-rc.3" />
+    <PackageReference Include="Volo.Abp.BackgroundJobs.Domain.Shared" Version="9.0.0-rc.3" />
+    <PackageReference Include="Volo.Abp.Core" Version="9.0.0-rc.3" />
+    <PackageReference Include="Volo.Abp.FeatureManagement.Domain.Shared" Version="9.0.0-rc.3" />
+    <PackageReference Include="Volo.Abp.Identity.Domain.Shared" Version="9.0.0-rc.3" />
+    <PackageReference Include="Volo.Abp.PermissionManagement.Domain.Shared" Version="9.0.0-rc.3" />
+    <PackageReference Include="Volo.Abp.SettingManagement.Domain.Shared" Version="9.0.0-rc.3" />
+    <PackageReference Include="Volo.Abp.TenantManagement.Domain.Shared" Version="9.0.0-rc.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Localization\" />
+  </ItemGroup>
+
+</Project>

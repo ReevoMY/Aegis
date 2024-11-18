@@ -1,4 +1,4 @@
-﻿using Aegis.Enums;
+﻿using Reevo.License.Domain.Shared.Enum;
 
 namespace Aegis.Server.DTOs;
 

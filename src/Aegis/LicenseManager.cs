@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
-using Aegis.Enums;
+using Reevo.License.Domain.Shared.Enum;
 using Aegis.Exceptions;
 using Aegis.Models;
 using Aegis.Utilities;
@@ -105,20 +105,20 @@ public static class LicenseManager
     ///     Loads a license from a file.
     /// </summary>
     /// <param name="filePath">The path to the file containing the license data.</param>
-    /// <param name="validationMode">The validation mode to use (Online or Offline).</param>
+    /// <param name="activationMode">The validation mode to use (Online or Offline).</param>
     /// <returns>The loaded license object, or null if the license is invalid.</returns>
     /// <exception cref="InvalidLicenseSignatureException">Thrown if the license signature is invalid.</exception>
     /// <exception cref="InvalidLicenseFormatException">Thrown if the license file format is invalid.</exception>
     /// <exception cref="LicenseValidationException">Thrown if the license validation fails.</exception>
     public static async Task<BaseLicense?> LoadLicenseAsync(
         string filePath,
-        ValidationMode validationMode = ValidationMode.Offline)
+        ActivationMode activationMode = ActivationMode.Offline)
     {
         // Read the combined data from the file
         var licenseData = await File.ReadAllBytesAsync(filePath);
 
         // Load the license from the combined data
-        Current = await LoadLicenseAsync(licenseData, validationMode);
+        Current = await LoadLicenseAsync(licenseData, activationMode);
 
         return Current;
     }
@@ -127,7 +127,7 @@ public static class LicenseManager
     ///     Loads a license from a byte array.
     /// </summary>
     /// <param name="licenseData">The byte array containing the license data.</param>
-    /// <param name="validationMode">The validation mode to use (Online or Offline).</param>
+    /// <param name="activationMode">The validation mode to use (Online or Offline).</param>
     /// <param name="validationParams">Optional validation parameters.</param>
     /// <returns>The loaded license object, or null if the license is invalid.</returns>
     /// <exception cref="InvalidLicenseSignatureException">Thrown if the license signature is invalid.</exception>
@@ -135,7 +135,7 @@ public static class LicenseManager
     /// <exception cref="LicenseValidationException">Thrown if the license validation fails.</exception>
     public static async Task<BaseLicense?> LoadLicenseAsync(
         byte[] licenseData,
-        ValidationMode validationMode = ValidationMode.Offline,
+        ActivationMode activationMode = ActivationMode.Offline,
         Dictionary<string, string?>? validationParams = null)
     {
         if (!LicenseValidator.VerifyLicenseData(licenseData, out var license) || license == null)
@@ -156,7 +156,7 @@ public static class LicenseManager
         };
 
         // Validate the license, VerifyLicenseData will be called again, but it's mandatory to keep LicenseValidator independent.
-        await ValidateLicenseAsync(license!, licenseData, validationMode, validationParams ?? GetValidationParams(license!)!);
+        await ValidateLicenseAsync(license!, licenseData, activationMode, validationParams ?? GetValidationParams(license!)!);
 
         return license;
     }
@@ -212,19 +212,19 @@ public static class LicenseManager
     /// </summary>
     /// <param name="license">The license object to validate.</param>
     /// <param name="licenseData">The raw license data.</param>
-    /// <param name="validationMode">The validation mode to use (Online or Offline).</param>
+    /// <param name="activationMode">The validation mode to use (Online or Offline).</param>
     /// <param name="validationParams">Optional validation parameters.</param>
     /// <returns>A task that represents the asynchronous validation operation.</returns>
     /// <exception cref="LicenseValidationException">Thrown if the license validation fails.</exception>
     private static async Task ValidateLicenseAsync(BaseLicense license, byte[] licenseData,
-        ValidationMode validationMode, Dictionary<string, string?>? validationParams)
+        ActivationMode activationMode, Dictionary<string, string?>? validationParams)
     {
-        switch (validationMode)
+        switch (activationMode)
         {
-            case ValidationMode.Online:
+            case ActivationMode.Online:
                 await ValidateLicenseOnlineAsync(license, licenseData);
                 break;
-            case ValidationMode.Offline:
+            case ActivationMode.Offline:
                 ValidateLicenseOffline(license, licenseData, validationParams);
                 break;
         }

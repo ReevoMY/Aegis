@@ -1,4 +1,4 @@
-﻿using Aegis.Enums;
+﻿using Reevo.License.Domain.Shared.Enum;
 using Aegis.Models;
 using FluentAssertions;
 

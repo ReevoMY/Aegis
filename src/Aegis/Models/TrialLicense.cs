@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-using Aegis.Enums;
+using Reevo.License.Domain.Shared.Enum;
 
 namespace Aegis.Models;
 

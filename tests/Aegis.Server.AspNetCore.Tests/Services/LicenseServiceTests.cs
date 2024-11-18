@@ -1,6 +1,7 @@
-﻿using Aegis.Enums;
+﻿using Reevo.License.Domain.Shared.Enum;
 using Aegis.Exceptions;
 using Aegis.Models;
+using Aegis.Server.AspNetCore.Entities;
 using Aegis.Server.Data;
 using Aegis.Server.DTOs;
 using Aegis.Server.Entities;
@@ -724,7 +725,7 @@ public class LicenseServiceTests
     {
         var productId = _dbContext.Products.First().ProductId;
         var licenseFeature = _dbContext.LicenseFeatures.First();
-        var license = new License
+        var license = new MyLicense
         {
             Type = licenseType,
             ProductId = productId,

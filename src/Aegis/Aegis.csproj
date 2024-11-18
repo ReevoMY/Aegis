@@ -33,6 +33,7 @@
     <PackageReference Include="Volo.Abp.Identity.Domain" Version="9.0.0-rc.3" />
     <PackageReference Include="Volo.Abp.PermissionManagement.Domain.OpenIddict" Version="9.0.0-rc.3" />
     <PackageReference Include="Volo.Abp.SettingManagement.Domain" Version="9.0.0-rc.3" />
+    <PackageReference Include="Volo.Abp.TenantManagement.Domain" Version="9.0.0-rc.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -42,6 +43,10 @@
     </None>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
     <None Include="..\..\LICENSE.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Reevo.License.Domain.Shared\Reevo.License.Domain.Shared.csproj" />
   </ItemGroup>
 
 </Project>
