@@ -24,6 +24,8 @@
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageReference Include="Volo.Abp.AspNetCore.Mvc" Version="9.0.0-rc.3" />
     <PackageReference Include="Volo.Abp.Autofac" Version="9.0.0-rc.3" />
+    <PackageReference Include="Volo.Abp.FeatureManagement.Application" Version="9.0.0-rc.3" />
+    <PackageReference Include="Volo.Abp.Localization" Version="9.0.0-rc.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,6 +35,7 @@
 
   <ItemGroup>
     <Folder Include="Data\Migrations\" />
+    <Folder Include="Localization\Resources\Features\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 

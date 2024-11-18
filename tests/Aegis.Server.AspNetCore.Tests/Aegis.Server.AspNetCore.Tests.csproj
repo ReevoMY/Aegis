@@ -33,4 +33,8 @@
     <ProjectReference Include="..\..\samples\Aegis.Server.AspNetCore\Aegis.Server.AspNetCore.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Localization\" />
+  </ItemGroup>
+
 </Project>

@@ -1,0 +1,20 @@
+﻿{
+  "culture": "en",
+  "texts": {
+    // Product 1
+    "Product1": "产品 1",
+    "Product1.Feature1": "产品1.F1",
+    "Product1.Feature1.Child1": "产品1.F1.C1",
+    "Product1.Feature1.Child2": "产品1.F1.C2",
+    "Product1.Feature2": "产品1.F2",
+    "Product1.Feature2.Child1": "产品1.F2.C1",
+
+    // Product 2
+    "Product2": "Product 2",
+    "Product2.Feature1": "产品2.F1",
+    "Product2.Feature1.Child1": "产品2.F1.C1",
+    "Product2.Feature1.Child2": "产品2.F1.C2",
+    "Product2.Feature2": "产品2.F2",
+    "Product2.Feature2.Child1": "产品2.F2.C1"
+  }
+}

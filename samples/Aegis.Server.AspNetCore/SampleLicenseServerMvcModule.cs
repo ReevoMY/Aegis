@@ -2,7 +2,6 @@
 using Aegis.Server.AspNetCore.Data.Context;
 using Aegis.Server.AspNetCore.DTOs;
 using Aegis.Server.AspNetCore.Filters;
-using Aegis.Server.AspNetCore.Services;
 using Aegis.Server.Data;
 using Aegis.Server.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -15,12 +14,16 @@ using Volo.Abp.AspNetCore.Mvc;
 using Volo.Abp.Autofac;
 using Volo.Abp.Modularity;
 using Microsoft.AspNetCore.Diagnostics;
+using Volo.Abp.Localization;
+using Volo.Abp.VirtualFileSystem;
+using Aegis.Server.AspNetCore.Localization;
 
 namespace Aegis.Server.AspNetCore;
 
-[DependsOn(typeof(AbpAspNetCoreMvcModule))]
-[DependsOn(typeof(AbpAutofacModule))]
-public class LicenseServerMvcModule : AbpModule
+[DependsOn(typeof(AbpAspNetCoreMvcModule),
+    typeof(AbpAutofacModule),
+    typeof(AbpLocalizationModule))]
+public class SampleLicenseServerMvcModule : AbpModule
 {
     public override void ConfigureServices(ServiceConfigurationContext context)
     {
@@ -53,6 +56,19 @@ public class LicenseServerMvcModule : AbpModule
 
         // Register custom services here
         var containerBuilder = context.Services.GetContainerBuilder();
+
+        // Configure ABP Services
+        Configure<AbpVirtualFileSystemOptions>(options =>
+        {
+            options.FileSets.AddEmbedded<SampleLicenseServerMvcModule>("Aegis.Server.AspNetCore");
+        });
+        Configure<AbpLocalizationOptions>(options =>
+        {
+            options.DefaultResourceType = typeof(FeaturesResource);
+            options.Resources
+                .Add<FeaturesResource>("en")
+                .AddVirtualJson("/Localization/Resources/Features");
+        });
     }
 
     public override void OnApplicationInitialization(ApplicationInitializationContext context)
