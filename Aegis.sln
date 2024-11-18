@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.32823.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aegis", "src\Aegis\Aegis.csproj", "{5DAB6F09-4E96-4467-9D08-F24E07821B8B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reevo.License.Domain", "src\Reevo.License.Domain\Reevo.License.Domain.csproj", "{5DAB6F09-4E96-4467-9D08-F24E07821B8B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aegis.Server", "src\Aegis.Server\Aegis.Server.csproj", "{25F3A203-7361-471F-AC48-60730701F6F6}"
 EndProject

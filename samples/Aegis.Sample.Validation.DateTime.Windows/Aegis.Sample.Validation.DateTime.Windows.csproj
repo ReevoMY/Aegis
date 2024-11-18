@@ -8,7 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Aegis\Aegis.csproj" />
+    <ProjectReference Include="..\..\src\Reevo.License.Domain.Shared\Reevo.License.Domain.Shared.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Reevo.License.Domain">
+      <HintPath>..\Aegis.Server.AspNetCore\bin\Debug\net9.0\Reevo.License.Domain.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

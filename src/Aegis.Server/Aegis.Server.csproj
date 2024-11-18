@@ -26,11 +26,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Aegis\Aegis.csproj" />
+    <ProjectReference Include="..\Aegis\Reevo.License.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Aegis\Aegis.csproj" />
+    <ProjectReference Include="..\Reevo.License.Domain\Reevo.License.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
