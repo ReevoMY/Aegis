@@ -2,9 +2,9 @@
 using System.Text.Json.Serialization;
 using Reevo.License.Domain.Shared.Enum;
 
-[assembly: InternalsVisibleTo("Aegis.Server")]
-[assembly: InternalsVisibleTo("Aegis.Server.Tests")]
-[assembly: InternalsVisibleTo("Aegis.Server.AspNetCore.Tests")]
+[assembly: InternalsVisibleTo("Reevo.License.EntityFrameworkCore")]
+[assembly: InternalsVisibleTo("Reevo.License.Domain.Tests")]
+[assembly: InternalsVisibleTo("Sample.License.Web.Tests")]
 
 namespace Aegis.Models;
 

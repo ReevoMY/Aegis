@@ -29,8 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Aegis.Server\Aegis.Server.csproj" />
-    <ProjectReference Include="..\..\src\Aegis\Reevo.License.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Aegis.Server\Reevo.License.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>

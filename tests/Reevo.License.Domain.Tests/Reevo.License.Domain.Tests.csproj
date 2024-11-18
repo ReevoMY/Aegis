@@ -27,11 +27,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="Xunit" />
+    <ProjectReference Include="..\..\src\Reevo.License.Domain\Reevo.License.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Aegis\Reevo.License.Domain.csproj" />
+    <Using Include="Xunit" />
   </ItemGroup>
 
   <ItemGroup>

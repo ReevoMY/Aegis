@@ -5,11 +5,11 @@ VisualStudioVersion = 17.0.32823.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reevo.License.Domain", "src\Reevo.License.Domain\Reevo.License.Domain.csproj", "{5DAB6F09-4E96-4467-9D08-F24E07821B8B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aegis.Server", "src\Aegis.Server\Aegis.Server.csproj", "{25F3A203-7361-471F-AC48-60730701F6F6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reevo.License.EntityFrameworkCore", "src\Aegis.Server\Reevo.License.EntityFrameworkCore.csproj", "{25F3A203-7361-471F-AC48-60730701F6F6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aegis.Server.AspNetCore", "samples\Aegis.Server.AspNetCore\Aegis.Server.AspNetCore.csproj", "{1ACAEA2F-1673-40D9-9040-7627C3D56AAC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aegis.Tests", "tests\Aegis.Tests\Aegis.Tests.csproj", "{504A25D0-92EC-4B0A-8755-8BFD14370488}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reevo.License.Domain.Tests", "tests\Reevo.License.Domain.Tests\Reevo.License.Domain.Tests.csproj", "{504A25D0-92EC-4B0A-8755-8BFD14370488}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9BB04FC3-081B-4A3F-B1BC-2D82C25F3975}"
 EndProject
@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{BFC52FAE
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{3B4518B1-BE92-40B8-A2D1-ABB73DF6FAC6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aegis.Server.AspNetCore.Tests", "tests\Aegis.Server.AspNetCore.Tests\Aegis.Server.AspNetCore.Tests.csproj", "{910C60A8-D7D1-4CAA-94FF-E8ABE3CCB348}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.License.Web.Tests", "tests\Sample.License.Web.Tests\Sample.License.Web.Tests.csproj", "{910C60A8-D7D1-4CAA-94FF-E8ABE3CCB348}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aegis.Sample.Console", "samples\Aegis.Sample.Console\Aegis.Sample.Console.csproj", "{4C205CAD-03F6-46B5-B963-C7F181E9CD10}"
 EndProject

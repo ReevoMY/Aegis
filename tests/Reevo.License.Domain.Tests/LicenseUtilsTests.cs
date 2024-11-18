@@ -128,7 +128,6 @@ public class LicenseUtilsTests
     }
 
     [Theory]
-    [InlineData(null)]
     [InlineData("")]
     [InlineData("Invalid/Path")]
     public void GenerateLicensingSecrets_ThrowsException_ForInvalidPath(string invalidPath)

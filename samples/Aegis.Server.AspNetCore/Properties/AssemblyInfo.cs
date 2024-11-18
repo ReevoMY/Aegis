@@ -1,3 +1,3 @@
 ﻿using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleToAttribute("Aegis.Server.AspNetCore.Tests")]
+[assembly: InternalsVisibleToAttribute("Sample.License.Web.Tests")]
