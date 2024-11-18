@@ -1,16 +1,17 @@
 ﻿using Reevo.License.Domain.Shared.Enum;
-using Aegis.Exceptions;
-using Aegis.Models;
-using Aegis.Server.Data;
-using Aegis.Server.DTOs;
-using Aegis.Server.Entities;
-using Aegis.Server.Enums;
-using Aegis.Server.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Reevo.License.Domain;
+using Reevo.License.Domain.Exceptions;
+using Reevo.License.Domain.Models;
+using Reevo.License.EntityFrameworkCore.Data;
+using Reevo.License.EntityFrameworkCore.DTOs;
+using Reevo.License.EntityFrameworkCore.Entities;
+using Reevo.License.EntityFrameworkCore.Enums;
+using Reevo.License.EntityFrameworkCore.Exceptions;
 
-namespace Aegis.Server.Services;
+namespace Reevo.License.EntityFrameworkCore.Services;
 
-public class LicenseService(AegisDbContext dbContext)
+public class LicenseService(LicenseDbContext dbContext)
 {
     /// <summary>
     ///     Generates a license file asynchronously.
@@ -395,9 +396,9 @@ public class LicenseService(AegisDbContext dbContext)
             throw new BadRequestException("Expiration date cannot be in the past");
     }
 
-    private License CreateLicenseEntity(LicenseGenerationRequest request)
+    private Entities.License CreateLicenseEntity(LicenseGenerationRequest request)
     {
-        return new License
+        return new Entities.License
         {
             Type = request.LicenseType,
             ProductId = request.ProductId,
@@ -411,7 +412,7 @@ public class LicenseService(AegisDbContext dbContext)
         };
     }
 
-    private async Task AddFeaturesToLicenseAsync(License license, LicenseGenerationRequest request)
+    private async Task AddFeaturesToLicenseAsync(Entities.License license, LicenseGenerationRequest request)
     {
         if (request.FeatureIds.Length == 0)
             return;
@@ -444,7 +445,7 @@ public class LicenseService(AegisDbContext dbContext)
         }
     }
 
-    private byte[] GenerateLicenseFile(License license)
+    private byte[] GenerateLicenseFile(Entities.License license)
     {
         var baseLicense = MapLicenseToBaseLicense(license);
         return license.Type switch
@@ -474,7 +475,7 @@ public class LicenseService(AegisDbContext dbContext)
         };
     }
 
-    private BaseLicense MapLicenseToBaseLicense(License license)
+    private BaseLicense MapLicenseToBaseLicense(Entities.License license)
     {
         return new BaseLicense
         {

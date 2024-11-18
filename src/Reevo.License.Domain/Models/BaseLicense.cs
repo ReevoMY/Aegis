@@ -6,7 +6,7 @@ using Reevo.License.Domain.Shared.Enum;
 [assembly: InternalsVisibleTo("Reevo.License.Domain.Tests")]
 [assembly: InternalsVisibleTo("Sample.License.Web.Tests")]
 
-namespace Aegis.Models;
+namespace Reevo.License.Domain.Models;
 
 [JsonDerivedType(typeof(StandardLicense), "Standard")]
 [JsonDerivedType(typeof(TrialLicense), "Trial")]

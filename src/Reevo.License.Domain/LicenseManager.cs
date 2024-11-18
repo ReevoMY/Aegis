@@ -3,14 +3,14 @@ using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Reevo.License.Domain.Shared.Enum;
-using Aegis.Exceptions;
-using Aegis.Models;
-using Aegis.Utilities;
 using Ardalis.GuardClauses;
+using Reevo.License.Domain.Exceptions;
+using Reevo.License.Domain.Models;
+using Reevo.License.Domain.Utilities;
 
 [assembly: InternalsVisibleTo("Aegis.Tests")]
 
-namespace Aegis;
+namespace Reevo.License.Domain;
 
 public static class LicenseManager
 {

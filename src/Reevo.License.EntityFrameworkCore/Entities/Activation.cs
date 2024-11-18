@@ -4,7 +4,7 @@ using Reevo.License.Domain.Shared.Enum;
 using Reevo.License.Domain.Shared.Model;
 using Volo.Abp.Domain.Entities;
 
-namespace Aegis.Server.Entities;
+namespace Reevo.License.EntityFrameworkCore.Entities;
 
 public class Activation : BasicAggregateRoot<Guid>
 {

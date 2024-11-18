@@ -1,7 +1,7 @@
-﻿using Aegis.Models;
-using Aegis.Models.Utils;
+﻿using Reevo.License.Domain.Models;
+using Reevo.License.Domain.Models.Utils;
 
-namespace Aegis.Interfaces;
+namespace Reevo.License.Domain.Interfaces;
 
 public interface IValidationRule
 {

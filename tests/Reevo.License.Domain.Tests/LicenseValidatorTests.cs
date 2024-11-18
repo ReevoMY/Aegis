@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
-using Aegis;
-using Aegis.Models;
-using Aegis.Utilities;
+using Reevo.License.Domain;
+using Reevo.License.Domain.Models;
+using Reevo.License.Domain.Utilities;
 using FluentAssertions;
 
 namespace Reevo.License.Domain.Tests;

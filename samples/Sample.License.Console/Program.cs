@@ -1,7 +1,7 @@
-﻿using Aegis;
+﻿using Reevo.License.Domain;
 using Reevo.License.Domain.Shared.Enum;
-using Aegis.Models;
-using Aegis.Utilities;
+using Reevo.License.Domain.Models;
+using Reevo.License.Domain.Utilities;
 
 namespace Sample.License.Console;
 

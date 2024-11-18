@@ -1,6 +1,6 @@
-﻿using Aegis.Exceptions;
-using Aegis.Models.Utils;
-using Aegis.Utilities;
+﻿using Reevo.License.Domain.Exceptions;
+using Reevo.License.Domain.Models.Utils;
+using Reevo.License.Domain.Utilities;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 

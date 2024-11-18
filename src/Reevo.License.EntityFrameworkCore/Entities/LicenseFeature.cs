@@ -1,4 +1,4 @@
-﻿namespace Aegis.Server.Entities;
+﻿namespace Reevo.License.EntityFrameworkCore.Entities;
 
 public class LicenseFeature
 {

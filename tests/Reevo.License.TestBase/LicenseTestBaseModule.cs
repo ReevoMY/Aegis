@@ -1,4 +1,4 @@
-﻿using Aegis;
+﻿using Reevo.License.Domain;
 using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp;
 using Volo.Abp.Authorization;

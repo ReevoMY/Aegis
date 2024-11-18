@@ -1,7 +1,7 @@
-﻿using Aegis;
-using Aegis.Exceptions;
-using Aegis.Models;
-using Aegis.Utilities;
+﻿using Reevo.License.Domain;
+using Reevo.License.Domain.Exceptions;
+using Reevo.License.Domain.Models;
+using Reevo.License.Domain.Utilities;
 
 namespace Sample.License.Validation.DateTime.Windows;
 

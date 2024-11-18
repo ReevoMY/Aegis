@@ -1,10 +1,10 @@
-﻿using Aegis.Server.Data;
+﻿using Reevo.License.EntityFrameworkCore.Data;
 using Microsoft.EntityFrameworkCore;
 using Sample.License.Web.Entities;
 
 namespace Sample.License.Web.Data.Context;
 
-public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : AegisDbContext(options)
+public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : LicenseDbContext(options)
 {
     public DbSet<User> Users { get; init; }
     public DbSet<Role> Roles { get; init; }

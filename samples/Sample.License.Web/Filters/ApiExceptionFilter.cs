@@ -1,4 +1,4 @@
-﻿using Aegis.Server.Exceptions;
+﻿using Reevo.License.EntityFrameworkCore.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Serilog;

@@ -1,11 +1,11 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
-using Aegis.Exceptions;
-using Aegis.Models.Utils;
 using Microsoft.Extensions.Configuration;
+using Reevo.License.Domain.Exceptions;
+using Reevo.License.Domain.Models.Utils;
 
-namespace Aegis.Utilities;
+namespace Reevo.License.Domain.Utilities;
 
 public static class LicenseUtils
 {

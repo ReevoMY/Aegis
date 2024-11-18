@@ -1,4 +1,4 @@
-﻿namespace Aegis.Server.DTOs;
+﻿namespace Reevo.License.EntityFrameworkCore.DTOs;
 
 public class LicenseDeactivationResult(bool isSuccessful, Exception? exception = null)
 {

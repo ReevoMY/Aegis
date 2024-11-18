@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Aegis.Server.Entities;
+using Reevo.License.EntityFrameworkCore.Entities;
 
 namespace Sample.License.Web.Entities;
 

@@ -1,7 +1,7 @@
-﻿using Aegis.Models;
-using Aegis.Utilities;
+﻿using Reevo.License.Domain.Models;
+using Reevo.License.Domain.Utilities;
 
-namespace Aegis;
+namespace Reevo.License.Domain;
 
 public static class LicenseGenerator
 {

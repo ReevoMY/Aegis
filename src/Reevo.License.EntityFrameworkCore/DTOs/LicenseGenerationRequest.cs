@@ -1,6 +1,6 @@
 ﻿using Reevo.License.Domain.Shared.Enum;
 
-namespace Aegis.Server.DTOs;
+namespace Reevo.License.EntityFrameworkCore.DTOs;
 
 public class LicenseGenerationRequest
 {

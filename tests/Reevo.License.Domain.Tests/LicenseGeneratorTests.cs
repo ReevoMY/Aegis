@@ -1,6 +1,6 @@
-﻿using Aegis;
+﻿using Reevo.License.Domain;
 using Reevo.License.Domain.Shared.Enum;
-using Aegis.Models;
+using Reevo.License.Domain.Models;
 using FluentAssertions;
 
 namespace Reevo.License.Domain.Tests;

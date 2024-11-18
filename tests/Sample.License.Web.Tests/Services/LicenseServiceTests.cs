@@ -1,15 +1,15 @@
-﻿using Aegis;
+﻿using Reevo.License.Domain;
 using Reevo.License.Domain.Shared.Enum;
-using Aegis.Exceptions;
-using Aegis.Models;
+using Reevo.License.Domain.Exceptions;
+using Reevo.License.Domain.Models;
 using Sample.License.Web.Entities;
-using Aegis.Server.Data;
-using Aegis.Server.DTOs;
-using Aegis.Server.Entities;
-using Aegis.Server.Enums;
-using Aegis.Server.Exceptions;
-using Aegis.Server.Services;
-using Aegis.Utilities;
+using Reevo.License.EntityFrameworkCore.Data;
+using Reevo.License.EntityFrameworkCore.DTOs;
+using Reevo.License.EntityFrameworkCore.Entities;
+using Reevo.License.EntityFrameworkCore.Enums;
+using Reevo.License.EntityFrameworkCore.Exceptions;
+using Reevo.License.EntityFrameworkCore.Services;
+using Reevo.License.Domain.Utilities;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,18 +19,18 @@ public class LicenseServiceTests
 {
     #region Fields
 
-    private readonly AegisDbContext _dbContext;
+    private readonly LicenseDbContext _dbContext;
     private readonly LicenseService _licenseService;
 
     #endregion
 
     public LicenseServiceTests()
     {
-        var options = new DbContextOptionsBuilder<AegisDbContext>()
+        var options = new DbContextOptionsBuilder<LicenseDbContext>()
             .UseInMemoryDatabase(Guid.NewGuid().ToString())
             .Options;
 
-        _dbContext = new AegisDbContext(options);
+        _dbContext = new LicenseDbContext(options);
         _licenseService = new LicenseService(_dbContext);
 
         // Initialize test data
@@ -721,7 +721,7 @@ public class LicenseServiceTests
     }
 
 
-    private Aegis.Server.Entities.License CreateAndSaveLicense(LicenseType licenseType, DateTime? expirationDate = null,
+    private Reevo.License.EntityFrameworkCore.Entities.License CreateAndSaveLicense(LicenseType licenseType, DateTime? expirationDate = null,
         string? hardwareId = null, int? maxActivations = null)
     {
         var productId = _dbContext.Products.First().ProductId;
@@ -745,7 +745,7 @@ public class LicenseServiceTests
         return license;
     }
 
-    private byte[] GenerateLicenseFile(Aegis.Server.Entities.License license)
+    private byte[] GenerateLicenseFile(Reevo.License.EntityFrameworkCore.Entities.License license)
     {
         var baseLicense = new BaseLicense
         {

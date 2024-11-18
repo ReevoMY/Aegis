@@ -1,5 +1,5 @@
 ﻿using System.Security.Cryptography;
-using Aegis.Utilities;
+using Reevo.License.Domain.Utilities;
 using FluentAssertions;
 
 namespace Reevo.License.Domain.Tests;

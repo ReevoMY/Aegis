@@ -1,7 +1,7 @@
 ﻿using System.Security.Cryptography;
 using Ardalis.GuardClauses;
 
-namespace Aegis.Utilities;
+namespace Reevo.License.Domain.Utilities;
 
 public static class SecurityUtils
 {

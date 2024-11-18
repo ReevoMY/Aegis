@@ -1,7 +1,7 @@
-﻿using Aegis.Server.Services;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Reevo.License.EntityFrameworkCore.Services;
 
-namespace Aegis.Server.Extensions;
+namespace Reevo.License.EntityFrameworkCore.Extensions;
 
 public static class ServiceExtensions
 {

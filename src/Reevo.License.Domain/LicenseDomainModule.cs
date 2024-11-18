@@ -9,7 +9,7 @@ using Volo.Abp.PermissionManagement.OpenIddict;
 using Volo.Abp.SettingManagement;
 using Volo.Abp.TenantManagement;
 
-namespace Aegis;
+namespace Reevo.License.Domain;
 
 [DependsOn(
     typeof(LicenseDomainSharedModule),

@@ -1,4 +1,4 @@
-﻿namespace Aegis.Models.Utils;
+﻿namespace Reevo.License.Domain.Models.Utils;
 
 public class LicensingSecrets
 {

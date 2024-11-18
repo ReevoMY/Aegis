@@ -1,4 +1,4 @@
-﻿namespace Aegis.Server.DTOs;
+﻿namespace Reevo.License.EntityFrameworkCore.DTOs;
 
 public class RenewLicenseRequest
 {

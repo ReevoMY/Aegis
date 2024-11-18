@@ -1,6 +1,6 @@
 ﻿using DeviceId;
 
-namespace Aegis.Utilities;
+namespace Reevo.License.Domain.Utilities;
 
 public static class HardwareUtils
 {

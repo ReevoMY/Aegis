@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
-using Aegis.Server.DTOs;
-using Aegis.Server.Services;
+using Reevo.License.EntityFrameworkCore.DTOs;
+using Reevo.License.EntityFrameworkCore.Services;
 using Microsoft.AspNetCore.Mvc;
 using Sample.License.Web.Attributes;
 using Volo.Abp.AspNetCore.Mvc;

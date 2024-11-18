@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
-using Aegis.Server.Data;
-using Aegis.Server.Extensions;
+using Reevo.License.EntityFrameworkCore.Data;
+using Reevo.License.EntityFrameworkCore.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using StackExchange.Profiling.SqlFormatters;
@@ -33,7 +33,7 @@ public class SampleLicenseServerMvcModule : AbpModule
             .Enrich.FromLogContext()
             .CreateLogger();
         context.Services.AddControllers();
-        context.Services.AddDbContext<AegisDbContext, ApplicationDbContext>(options =>
+        context.Services.AddDbContext<LicenseDbContext, ApplicationDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
         context.Services.AddMvc(options => { options.Filters.Add<ApiExceptionFilter>(); });
         context.Services.Configure<JwtSettings>(configuration.GetSection("JwtSettings"));

@@ -1,9 +1,9 @@
-﻿using Aegis.Server.Data;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Reevo.License.EntityFrameworkCore.Data;
 
-namespace Aegis.Server.Services;
+namespace Reevo.License.EntityFrameworkCore.Services;
 
 public class HeartbeatMonitor(IServiceProvider serviceProvider) : BackgroundService
 {
@@ -31,7 +31,7 @@ public class HeartbeatMonitor(IServiceProvider serviceProvider) : BackgroundServ
     private async Task Monitor()
     {
         using var scope = _scopeFactory.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<AegisDbContext>();
+        var dbContext = scope.ServiceProvider.GetRequiredService<LicenseDbContext>();
 
         var timeoutThreshold = DateTime.UtcNow.Subtract(_heartbeatTimeout);
 

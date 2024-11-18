@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
 using Reevo.License.Domain.Shared.Enum;
 
-namespace Aegis.Models;
+namespace Reevo.License.Domain.Models;
 
 [JsonDerivedType(typeof(FloatingLicense), "Floating")]
 public class FloatingLicense : BaseLicense

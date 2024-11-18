@@ -1,12 +1,12 @@
-﻿using Aegis.Server.Entities;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Reevo.License.EntityFrameworkCore.Entities;
 
-namespace Aegis.Server.Data;
+namespace Reevo.License.EntityFrameworkCore.Data;
 
-public class AegisDbContext(DbContextOptions options) : DbContext(options)
+public class LicenseDbContext(DbContextOptions options) : DbContext(options)
 {
     public DbSet<Activation> Activations { get; set; }
-    public DbSet<License> Licenses { get; set; }
+    public DbSet<Entities.License> Licenses { get; set; }
     public DbSet<Product> Products { get; set; }
     public DbSet<Feature> Features { get; set; }
     public DbSet<LicenseFeature> LicenseFeatures { get; set; }
@@ -16,7 +16,7 @@ public class AegisDbContext(DbContextOptions options) : DbContext(options)
         base.OnModelCreating(modelBuilder);
 
         // License - Product (One-to-Many)
-        modelBuilder.Entity<License>()
+        modelBuilder.Entity<Entities.License>()
             .HasOne(l => l.Product)
             .WithMany(p => p.Licenses)
             .HasForeignKey(l => l.ProductId);

@@ -1,7 +1,7 @@
-﻿using Aegis.Exceptions;
-using Aegis.Models;
+﻿using Reevo.License.Domain.Exceptions;
+using Reevo.License.Domain.Models;
 
-namespace Aegis;
+namespace Reevo.License.Domain;
 
 public static class LicenseBuilder
 {

@@ -1,12 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Reevo.License.Domain.Shared.Enum;
-using Aegis.Server.Enums;
 using Ardalis.GuardClauses;
 using Reevo.License.Domain.Shared.Model;
+using Reevo.License.EntityFrameworkCore.Enums;
 using Volo.Abp.Domain.Entities;
 
-namespace Aegis.Server.Entities;
+namespace Reevo.License.EntityFrameworkCore.Entities;
 
 public class License : BasicAggregateRoot<Guid>
 {

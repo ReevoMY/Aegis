@@ -1,4 +1,4 @@
-﻿namespace Aegis.Server.Enums;
+﻿namespace Reevo.License.EntityFrameworkCore.Enums;
 
 public enum LicenseStatus
 {
