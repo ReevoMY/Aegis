@@ -104,24 +104,27 @@ namespace Aegis.Server.AspNetCore.Migrations
                 name: "Licenses",
                 columns: table => new
                 {
-                    LicenseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    LicenseKey = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    LicenseKey = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
                     Type = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: true),
+                    Version = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: true),
+                    Issuer = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
+                    IssuedTo = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: false),
                     IssuedOn = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ExpirationDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Issuer = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    IssuedTo = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     MaxActiveUsersCount = table.Column<int>(type: "int", nullable: true),
                     ActiveUsersCount = table.Column<int>(type: "int", nullable: true),
                     HardwareId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SubscriptionExpiryDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     ProductId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Discriminator = table.Column<string>(type: "nvarchar(13)", maxLength: 13, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Licenses", x => x.LicenseId);
+                    table.PrimaryKey("PK_Licenses", x => x.Id);
                     table.ForeignKey(
                         name: "FK_Licenses_Products_ProductId",
                         column: x => x.ProductId,
@@ -141,10 +144,11 @@ namespace Aegis.Server.AspNetCore.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    MachineId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ActivationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    LastHeartbeat = table.Column<DateTime>(type: "datetime2", nullable: false),
                     LicenseId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    MachineId = table.Column<string>(type: "nvarchar(128)", maxLength: 128, nullable: false),
+                    ActivationDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ActivationMode = table.Column<int>(type: "int", nullable: false),
+                    LastHeartbeat = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
@@ -154,7 +158,7 @@ namespace Aegis.Server.AspNetCore.Migrations
                         name: "FK_Activations_Licenses_LicenseId",
                         column: x => x.LicenseId,
                         principalTable: "Licenses",
-                        principalColumn: "LicenseId",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -180,7 +184,7 @@ namespace Aegis.Server.AspNetCore.Migrations
                         name: "FK_LicenseFeatures_Licenses_LicenseId",
                         column: x => x.LicenseId,
                         principalTable: "Licenses",
-                        principalColumn: "LicenseId");
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_LicenseFeatures_Products_ProductId",
                         column: x => x.ProductId,

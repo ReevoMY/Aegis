@@ -17,7 +17,7 @@ namespace Aegis.Server.AspNetCore.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0-rc.2.24474.1")
+                .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -124,6 +124,9 @@ namespace Aegis.Server.AspNetCore.Migrations
                     b.Property<DateTime>("ActivationDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("ActivationMode")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("LastHeartbeat")
                         .HasColumnType("datetime2");
 
@@ -132,7 +135,8 @@ namespace Aegis.Server.AspNetCore.Migrations
 
                     b.Property<string>("MachineId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -161,12 +165,21 @@ namespace Aegis.Server.AspNetCore.Migrations
 
             modelBuilder.Entity("Aegis.Server.Entities.License", b =>
                 {
-                    b.Property<Guid>("LicenseId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int?>("ActiveUsersCount")
                         .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<string>("Discriminator")
+                        .IsRequired()
+                        .HasMaxLength(13)
+                        .HasColumnType("nvarchar(13)");
 
                     b.Property<DateTime?>("ExpirationDate")
                         .HasColumnType("datetime2");
@@ -179,15 +192,18 @@ namespace Aegis.Server.AspNetCore.Migrations
 
                     b.Property<string>("IssuedTo")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("Issuer")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("LicenseKey")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
 
                     b.Property<int?>("MaxActiveUsersCount")
                         .HasColumnType("int");
@@ -207,13 +223,19 @@ namespace Aegis.Server.AspNetCore.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("LicenseId");
+                    b.Property<string>("Version")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("ProductId");
 
-                    b.HasIndex("UserId");
-
                     b.ToTable("Licenses");
+
+                    b.HasDiscriminator().HasValue("License");
+
+                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Aegis.Server.Entities.LicenseFeature", b =>
@@ -259,6 +281,15 @@ namespace Aegis.Server.AspNetCore.Migrations
                     b.ToTable("Products");
                 });
 
+            modelBuilder.Entity("Aegis.Server.AspNetCore.Entities.MyLicense", b =>
+                {
+                    b.HasBaseType("Aegis.Server.Entities.License");
+
+                    b.HasIndex("UserId");
+
+                    b.HasDiscriminator().HasValue("MyLicense");
+                });
+
             modelBuilder.Entity("Aegis.Server.AspNetCore.Entities.RefreshToken", b =>
                 {
                     b.HasOne("Aegis.Server.AspNetCore.Entities.User", "User")
@@ -293,12 +324,6 @@ namespace Aegis.Server.AspNetCore.Migrations
                     b.HasOne("Aegis.Server.Entities.Product", "Product")
                         .WithMany("Licenses")
                         .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Aegis.Server.AspNetCore.Entities.User", null)
-                        .WithMany("Licenses")
-                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -337,6 +362,15 @@ namespace Aegis.Server.AspNetCore.Migrations
                     b.HasOne("Aegis.Server.AspNetCore.Entities.User", null)
                         .WithMany("Products")
                         .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("Aegis.Server.AspNetCore.Entities.MyLicense", b =>
+                {
+                    b.HasOne("Aegis.Server.AspNetCore.Entities.User", null)
+                        .WithMany("Licenses")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Aegis.Server.AspNetCore.Entities.Role", b =>

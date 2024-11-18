@@ -27,6 +27,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ByteDash.LicenseServer", "s
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reevo.License.Domain.Shared", "src\Reevo.License.Domain.Shared\Reevo.License.Domain.Shared.csproj", "{B8DCF89C-EC9B-4F3C-B815-3F59CB07993C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reevo.License.TestBase", "tests\Reevo.License.TestBase\Reevo.License.TestBase.csproj", "{2DE1A83E-9166-4197-831F-4C17BCB78B89}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{B8DCF89C-EC9B-4F3C-B815-3F59CB07993C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B8DCF89C-EC9B-4F3C-B815-3F59CB07993C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B8DCF89C-EC9B-4F3C-B815-3F59CB07993C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2DE1A83E-9166-4197-831F-4C17BCB78B89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DE1A83E-9166-4197-831F-4C17BCB78B89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DE1A83E-9166-4197-831F-4C17BCB78B89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DE1A83E-9166-4197-831F-4C17BCB78B89}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -83,5 +89,6 @@ Global
 		{89ED0BAB-6CE3-4162-BEE5-67408451CEF9} = {3B4518B1-BE92-40B8-A2D1-ABB73DF6FAC6}
 		{2AA9FB34-10DF-4DB3-8C81-A4C6A8E8A8B9} = {3B4518B1-BE92-40B8-A2D1-ABB73DF6FAC6}
 		{B8DCF89C-EC9B-4F3C-B815-3F59CB07993C} = {9BB04FC3-081B-4A3F-B1BC-2D82C25F3975}
+		{2DE1A83E-9166-4197-831F-4C17BCB78B89} = {BFC52FAE-C62E-416F-88EE-43279AFE14E0}
 	EndGlobalSection
 EndGlobal
