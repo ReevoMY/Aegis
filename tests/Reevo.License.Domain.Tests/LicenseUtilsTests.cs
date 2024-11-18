@@ -4,7 +4,7 @@ using Aegis.Utilities;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 
-namespace Aegis.Tests;
+namespace Reevo.License.Domain.Tests;
 
 public class LicenseUtilsTests
 {

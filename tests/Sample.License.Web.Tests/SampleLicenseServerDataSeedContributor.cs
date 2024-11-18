@@ -1,8 +1,7 @@
-﻿using System.Threading.Tasks;
-using Volo.Abp.Data;
+﻿using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
 
-namespace Aegis.Server.AspNetCore.Tests
+namespace Sample.License.Web.Tests
 {
     public class SampleLicenseServerDataSeedContributor : IDataSeedContributor, ITransientDependency
     {

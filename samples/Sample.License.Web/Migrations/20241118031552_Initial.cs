@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Aegis.Server.AspNetCore.Migrations
+namespace Sample.License.Web.Migrations
 {
     /// <inheritdoc />
     public partial class Initial : Migration

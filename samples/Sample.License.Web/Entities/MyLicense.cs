@@ -1,7 +1,7 @@
 ﻿using Aegis.Server.Entities;
 
-namespace Aegis.Server.AspNetCore.Entities;
+namespace Sample.License.Web.Entities;
 
-public class MyLicense : License
+public class MyLicense : Aegis.Server.Entities.License
 {
 }

@@ -1,9 +1,9 @@
-﻿using Aegis.Server.AspNetCore.Data.Context;
-using Aegis.Server.AspNetCore.Middlewares;
-using Aegis.Server.AspNetCore.Services;
-using Microsoft.AspNetCore.Mvc.Filters;
+﻿using Microsoft.AspNetCore.Mvc.Filters;
+using Sample.License.Web.Data.Context;
+using Sample.License.Web.Middlewares;
+using Sample.License.Web.Services;
 
-namespace Aegis.Server.AspNetCore.Attributes;
+namespace Sample.License.Web.Attributes;
 
 /// <summary>
 ///     Attribute for authorizing access to an action.

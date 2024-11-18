@@ -1,8 +1,8 @@
-﻿using Aegis.Server.AspNetCore.Localization;
+﻿using Sample.License.Web.Localization;
 using FluentAssertions;
 using Microsoft.Extensions.Localization;
 
-namespace Aegis.Server.AspNetCore.Tests.Localization;
+namespace Sample.License.Web.Tests.Localization;
 
 public class FeaturesLocalizationTests : SampleLicenseServerTestBase
 {

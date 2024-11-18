@@ -2,16 +2,16 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using Aegis.Server.AspNetCore.Data.Context;
-using Aegis.Server.AspNetCore.DTOs;
-using Aegis.Server.AspNetCore.Entities;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Sample.License.Web.Data.Context;
+using Sample.License.Web.DTOs;
+using Sample.License.Web.Entities;
 using Volo.Abp.Application.Services;
 
-namespace Aegis.Server.AspNetCore.Services;
+namespace Sample.License.Web.Services;
 
 public class AuthService(ApplicationDbContext dbContext, IOptions<JwtSettings> options) : ApplicationService, IAuthService
 {

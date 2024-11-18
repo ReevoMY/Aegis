@@ -1,6 +1,6 @@
 ﻿using Microsoft.Win32;
 
-namespace Aegis.Sample.Validation.DateTime.Windows;
+namespace Sample.License.Validation.DateTime.Windows;
 
 
 public interface IDateTimeProvider

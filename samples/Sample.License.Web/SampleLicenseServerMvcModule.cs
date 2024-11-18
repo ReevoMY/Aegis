@@ -1,7 +1,4 @@
 ﻿using System.Text.Json;
-using Aegis.Server.AspNetCore.Data.Context;
-using Aegis.Server.AspNetCore.DTOs;
-using Aegis.Server.AspNetCore.Filters;
 using Aegis.Server.Data;
 using Aegis.Server.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -16,9 +13,12 @@ using Volo.Abp.Modularity;
 using Microsoft.AspNetCore.Diagnostics;
 using Volo.Abp.Localization;
 using Volo.Abp.VirtualFileSystem;
-using Aegis.Server.AspNetCore.Localization;
+using Sample.License.Web.Data.Context;
+using Sample.License.Web.DTOs;
+using Sample.License.Web.Filters;
+using Sample.License.Web.Localization;
 
-namespace Aegis.Server.AspNetCore;
+namespace Sample.License.Web;
 
 [DependsOn(typeof(AbpAspNetCoreMvcModule),
     typeof(AbpAutofacModule),

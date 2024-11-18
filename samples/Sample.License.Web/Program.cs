@@ -1,4 +1,4 @@
-using Aegis.Server.AspNetCore;
+using Sample.License.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Host.UseAutofac();

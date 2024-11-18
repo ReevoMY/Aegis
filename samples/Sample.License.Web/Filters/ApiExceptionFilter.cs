@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Serilog;
 
-namespace Aegis.Server.AspNetCore.Filters;
+namespace Sample.License.Web.Filters;
 
 public class ApiExceptionFilter : IExceptionFilter
 {

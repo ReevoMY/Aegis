@@ -3,7 +3,7 @@ using Aegis.Interfaces;
 using Aegis.Models;
 using Aegis.Models.Utils;
 
-namespace Aegis.Sample.Validation.DateTime.Windows;
+namespace Sample.License.Validation.DateTime.Windows;
 
 public class TrialPeriodValidationRule(IDateTimeProvider dateTimeProvider) : IValidationRule
 {

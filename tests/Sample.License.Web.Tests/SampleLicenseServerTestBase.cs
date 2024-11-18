@@ -1,6 +1,6 @@
 ﻿using Reevo.License.TestBase;
 
-namespace Aegis.Server.AspNetCore.Tests;
+namespace Sample.License.Web.Tests;
 
 public class SampleLicenseServerTestBase : LicenseTestBase<SampleLicenseServerTestModule>
 {

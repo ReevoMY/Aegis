@@ -1,8 +1,9 @@
-﻿using Reevo.License.Domain.Shared.Enum;
+﻿using Aegis;
+using Reevo.License.Domain.Shared.Enum;
 using Aegis.Models;
 using Aegis.Utilities;
 
-namespace Aegis.Sample.Console;
+namespace Sample.License.Console;
 
 public static class Program
 {

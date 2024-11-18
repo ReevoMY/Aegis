@@ -1,7 +1,8 @@
-﻿using Reevo.License.Domain.Shared.Enum;
+﻿using Aegis;
+using Reevo.License.Domain.Shared.Enum;
 using Aegis.Exceptions;
 using Aegis.Models;
-using Aegis.Server.AspNetCore.Entities;
+using Sample.License.Web.Entities;
 using Aegis.Server.Data;
 using Aegis.Server.DTOs;
 using Aegis.Server.Entities;
@@ -12,7 +13,7 @@ using Aegis.Utilities;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Aegis.Server.Tests.Services;
+namespace Sample.License.Web.Tests.Services;
 
 public class LicenseServiceTests
 {
@@ -720,7 +721,7 @@ public class LicenseServiceTests
     }
 
 
-    private License CreateAndSaveLicense(LicenseType licenseType, DateTime? expirationDate = null,
+    private Aegis.Server.Entities.License CreateAndSaveLicense(LicenseType licenseType, DateTime? expirationDate = null,
         string? hardwareId = null, int? maxActivations = null)
     {
         var productId = _dbContext.Products.First().ProductId;
@@ -744,7 +745,7 @@ public class LicenseServiceTests
         return license;
     }
 
-    private byte[] GenerateLicenseFile(License license)
+    private byte[] GenerateLicenseFile(Aegis.Server.Entities.License license)
     {
         var baseLicense = new BaseLicense
         {

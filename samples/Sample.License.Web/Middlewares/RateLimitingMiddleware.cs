@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 
-namespace Aegis.Server.AspNetCore.Middlewares;
+namespace Sample.License.Web.Middlewares;
 
 public class RateLimitingMiddleware(RequestDelegate next, IMemoryCache memoryCache, int limit, TimeSpan period)
 {

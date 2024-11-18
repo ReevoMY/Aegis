@@ -1,7 +1,8 @@
-﻿using Reevo.License.TestBase;
+﻿using Sample.License.Web;
+using Reevo.License.TestBase;
 using Volo.Abp.Modularity;
 
-namespace Aegis.Server.AspNetCore.Tests;
+namespace Sample.License.Web.Tests;
 
 [DependsOn(
     typeof(SampleLicenseServerMvcModule),

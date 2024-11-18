@@ -1,9 +1,9 @@
-﻿using Aegis.Server.AspNetCore.Localization;
+﻿using Sample.License.Web.Localization;
 using Volo.Abp.Features;
 using Volo.Abp.Localization;
 using Volo.Abp.Validation.StringValues;
 
-namespace Aegis.Server.AspNetCore.Services;
+namespace Sample.License.Web.Services;
 
 /// <summary>
 /// This class is used to define features for the products managed by the license server.

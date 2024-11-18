@@ -2,7 +2,7 @@
 using Aegis.Utilities;
 using FluentAssertions;
 
-namespace Aegis.Tests;
+namespace Reevo.License.Domain.Tests;
 
 public class SecurityUtilsTests
 {

@@ -1,9 +1,10 @@
 ﻿using System.Reflection;
+using Aegis;
 using Aegis.Models;
 using Aegis.Utilities;
 using FluentAssertions;
 
-namespace Aegis.Tests;
+namespace Reevo.License.Domain.Tests;
 
 public class LicenseValidatorTests
 {

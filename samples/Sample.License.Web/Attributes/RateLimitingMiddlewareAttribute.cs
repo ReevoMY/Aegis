@@ -1,8 +1,8 @@
-﻿using Aegis.Server.AspNetCore.Middlewares;
-using Microsoft.AspNetCore.Mvc.Filters;
+﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Caching.Memory;
+using Sample.License.Web.Middlewares;
 
-namespace Aegis.Server.AspNetCore.Attributes;
+namespace Sample.License.Web.Attributes;
 
 /// <summary>
 ///     Attribute for limiting access to an action.

@@ -1,15 +1,15 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
-using Aegis.Server.AspNetCore.Controllers;
-using Aegis.Server.AspNetCore.Data.Context;
-using Aegis.Server.AspNetCore.DTOs;
-using Aegis.Server.AspNetCore.Entities;
-using Aegis.Server.AspNetCore.Services;
+using Sample.License.Web.Controllers;
+using Sample.License.Web.Data.Context;
+using Sample.License.Web.DTOs;
+using Sample.License.Web.Entities;
+using Sample.License.Web.Services;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-namespace Aegis.Server.AspNetCore.Tests.Controllers;
+namespace Sample.License.Web.Tests.Controllers;
 
 public class AuthenticationControllerTests
 {

@@ -1,8 +1,8 @@
-﻿using Aegis.Server.AspNetCore.DTOs;
-using System.Security.Claims;
+﻿using System.Security.Claims;
+using Sample.License.Web.DTOs;
 using Volo.Abp.Application.Services;
 
-namespace Aegis.Server.AspNetCore.Services;
+namespace Sample.License.Web.Services;
 
 public interface IAuthService : IApplicationService
 {

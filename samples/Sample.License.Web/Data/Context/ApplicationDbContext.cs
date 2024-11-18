@@ -1,8 +1,8 @@
-﻿using Aegis.Server.AspNetCore.Entities;
-using Aegis.Server.Data;
+﻿using Aegis.Server.Data;
 using Microsoft.EntityFrameworkCore;
+using Sample.License.Web.Entities;
 
-namespace Aegis.Server.AspNetCore.Data.Context;
+namespace Sample.License.Web.Data.Context;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : AegisDbContext(options)
 {

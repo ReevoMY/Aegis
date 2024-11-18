@@ -5,16 +5,17 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using Aegis;
 using Reevo.License.Domain.Shared.Enum;
 using Aegis.Exceptions;
 using Aegis.Models;
-using Aegis.Server.AspNetCore.Attributes;
-using Aegis.Server.AspNetCore.Controllers;
-using Aegis.Server.AspNetCore.Data.Context;
-using Aegis.Server.AspNetCore.DTOs;
-using Aegis.Server.AspNetCore.Entities;
-using Aegis.Server.AspNetCore.Middlewares;
-using Aegis.Server.AspNetCore.Services;
+using Sample.License.Web.Attributes;
+using Sample.License.Web.Controllers;
+using Sample.License.Web.Data.Context;
+using Sample.License.Web.DTOs;
+using Sample.License.Web.Entities;
+using Sample.License.Web.Middlewares;
+using Sample.License.Web.Services;
 using Aegis.Server.DTOs;
 using Aegis.Server.Entities;
 using Aegis.Server.Enums;
@@ -30,7 +31,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Moq;
 
-namespace Aegis.Server.AspNetCore.Tests.Controllers;
+namespace Sample.License.Web.Tests.Controllers;
 
 public class LicensesControllerTests
 {
@@ -1098,7 +1099,7 @@ public class LicensesControllerTests
         };
     }
 
-    private License CreateAndSaveLicense(LicenseType licenseType, DateTime? expirationDate = null,
+    private Aegis.Server.Entities.License CreateAndSaveLicense(LicenseType licenseType, DateTime? expirationDate = null,
         string? hardwareId = null, int? maxActivations = null)
     {
         var productId = _dbContext.Products.First().ProductId;
@@ -1122,7 +1123,7 @@ public class LicensesControllerTests
         return license;
     }
 
-    private byte[] GenerateLicenseFile(License license)
+    private byte[] GenerateLicenseFile(Aegis.Server.Entities.License license)
     {
         var baseLicense = new BaseLicense
         {

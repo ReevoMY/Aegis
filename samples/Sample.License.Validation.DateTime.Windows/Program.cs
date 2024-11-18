@@ -1,8 +1,9 @@
-﻿using Aegis.Exceptions;
+﻿using Aegis;
+using Aegis.Exceptions;
 using Aegis.Models;
 using Aegis.Utilities;
 
-namespace Aegis.Sample.Validation.DateTime.Windows;
+namespace Sample.License.Validation.DateTime.Windows;
 
 internal static class Program
 {

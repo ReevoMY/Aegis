@@ -1,11 +1,11 @@
 ﻿using System.Text.Json;
-using Aegis.Server.AspNetCore.Attributes;
 using Aegis.Server.DTOs;
 using Aegis.Server.Services;
 using Microsoft.AspNetCore.Mvc;
+using Sample.License.Web.Attributes;
 using Volo.Abp.AspNetCore.Mvc;
 
-namespace Aegis.Server.AspNetCore.Controllers;
+namespace Sample.License.Web.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]

@@ -1,4 +1,4 @@
-﻿namespace Aegis.Server.AspNetCore.DTOs;
+﻿namespace Sample.License.Web.DTOs;
 
 public class RefreshTokenDto
 {

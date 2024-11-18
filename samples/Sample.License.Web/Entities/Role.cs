@@ -1,4 +1,4 @@
-﻿namespace Aegis.Server.AspNetCore.Entities;
+﻿namespace Sample.License.Web.Entities;
 
 public class Role
 {

@@ -1,10 +1,11 @@
-﻿using Reevo.License.Domain.Shared.Enum;
+﻿using Aegis;
+using Reevo.License.Domain.Shared.Enum;
 using Aegis.Exceptions;
 using Aegis.Models;
 using Aegis.Utilities;
 using FluentAssertions;
 
-namespace Aegis.Tests;
+namespace Reevo.License.Domain.Tests;
 
 public class LicenseBuilderTests
 {

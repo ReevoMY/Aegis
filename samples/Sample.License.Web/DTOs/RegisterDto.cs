@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Aegis.Server.AspNetCore.DTOs;
+namespace Sample.License.Web.DTOs;
 
 public class RegisterDto
 {

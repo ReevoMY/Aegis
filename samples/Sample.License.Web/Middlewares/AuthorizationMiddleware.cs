@@ -1,9 +1,9 @@
 ﻿using System.Security.Claims;
-using Aegis.Server.AspNetCore.Data.Context;
-using Aegis.Server.AspNetCore.Services;
 using Microsoft.EntityFrameworkCore;
+using Sample.License.Web.Data.Context;
+using Sample.License.Web.Services;
 
-namespace Aegis.Server.AspNetCore.Middlewares;
+namespace Sample.License.Web.Middlewares;
 
 /// <summary>
 ///     Middleware for handling authorization, validating JWT tokens and checking user permissions.
