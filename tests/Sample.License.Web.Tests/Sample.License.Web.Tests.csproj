@@ -30,14 +30,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\samples\Aegis.Server.AspNetCore\Aegis.Server.AspNetCore.csproj" />
+    <ProjectReference Include="..\..\samples\Aegis.Server.AspNetCore\Sample.License.Web.csproj" />
+    <ProjectReference Include="..\..\samples\Sample.License.Web\Sample.License.Web.csproj" />
     <ProjectReference Include="..\Reevo.License.TestBase\Reevo.License.TestBase.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Reevo.License.Domain">
-      <HintPath>..\..\samples\Aegis.Server.AspNetCore\bin\Debug\net9.0\Reevo.License.Domain.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

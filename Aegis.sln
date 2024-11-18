@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reevo.License.Domain", "src
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reevo.License.EntityFrameworkCore", "src\Aegis.Server\Reevo.License.EntityFrameworkCore.csproj", "{25F3A203-7361-471F-AC48-60730701F6F6}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aegis.Server.AspNetCore", "samples\Aegis.Server.AspNetCore\Aegis.Server.AspNetCore.csproj", "{1ACAEA2F-1673-40D9-9040-7627C3D56AAC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.License.Web", "samples\Sample.License.Web\Sample.License.Web.csproj", "{1ACAEA2F-1673-40D9-9040-7627C3D56AAC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reevo.License.Domain.Tests", "tests\Reevo.License.Domain.Tests\Reevo.License.Domain.Tests.csproj", "{504A25D0-92EC-4B0A-8755-8BFD14370488}"
 EndProject
@@ -19,9 +19,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{3B45
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.License.Web.Tests", "tests\Sample.License.Web.Tests\Sample.License.Web.Tests.csproj", "{910C60A8-D7D1-4CAA-94FF-E8ABE3CCB348}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aegis.Sample.Console", "samples\Aegis.Sample.Console\Aegis.Sample.Console.csproj", "{4C205CAD-03F6-46B5-B963-C7F181E9CD10}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.License.Console", "samples\Sample.License.Console\Sample.License.Console.csproj", "{4C205CAD-03F6-46B5-B963-C7F181E9CD10}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Aegis.Sample.Validation.DateTime.Windows", "samples\Aegis.Sample.Validation.DateTime.Windows\Aegis.Sample.Validation.DateTime.Windows.csproj", "{89ED0BAB-6CE3-4162-BEE5-67408451CEF9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.License.Validation.DateTime.Windows", "samples\Sample.License.Validation.DateTime.Windows\Sample.License.Validation.DateTime.Windows.csproj", "{89ED0BAB-6CE3-4162-BEE5-67408451CEF9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ByteDash.LicenseServer", "samples\ByteDash.LicenseServer\ByteDash.LicenseServer.csproj", "{2AA9FB34-10DF-4DB3-8C81-A4C6A8E8A8B9}"
 EndProject

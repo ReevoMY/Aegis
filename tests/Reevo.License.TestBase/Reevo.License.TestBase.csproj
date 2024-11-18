@@ -23,12 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Aegis\Reevo.License.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Reevo.License.Domain">
-      <HintPath>..\..\samples\Aegis.Server.AspNetCore\bin\Debug\net9.0\Reevo.License.Domain.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\..\src\Reevo.License.Domain\Reevo.License.Domain.csproj" />
   </ItemGroup>
 
 </Project>

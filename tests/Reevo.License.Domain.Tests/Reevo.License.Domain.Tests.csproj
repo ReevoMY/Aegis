@@ -34,10 +34,4 @@
     <Using Include="Xunit" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="Reevo.License.Domain">
-      <HintPath>..\..\samples\Aegis.Server.AspNetCore\bin\Debug\net9.0\Reevo.License.Domain.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>
