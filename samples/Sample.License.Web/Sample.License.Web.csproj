@@ -30,6 +30,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Aegis.Server\Reevo.License.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\..\src\Reevo.License.EntityFrameworkCore\Reevo.License.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>

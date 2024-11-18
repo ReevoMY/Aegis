@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.32823.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reevo.License.Domain", "src\Reevo.License.Domain\Reevo.License.Domain.csproj", "{5DAB6F09-4E96-4467-9D08-F24E07821B8B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reevo.License.EntityFrameworkCore", "src\Aegis.Server\Reevo.License.EntityFrameworkCore.csproj", "{25F3A203-7361-471F-AC48-60730701F6F6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Reevo.License.EntityFrameworkCore", "src\Reevo.License.EntityFrameworkCore\Reevo.License.EntityFrameworkCore.csproj", "{25F3A203-7361-471F-AC48-60730701F6F6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.License.Web", "samples\Sample.License.Web\Sample.License.Web.csproj", "{1ACAEA2F-1673-40D9-9040-7627C3D56AAC}"
 EndProject

@@ -32,6 +32,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\samples\Aegis.Server.AspNetCore\Sample.License.Web.csproj" />
     <ProjectReference Include="..\..\samples\Sample.License.Web\Sample.License.Web.csproj" />
+    <ProjectReference Include="..\..\src\Reevo.License.EntityFrameworkCore\Reevo.License.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\Reevo.License.TestBase\Reevo.License.TestBase.csproj" />
   </ItemGroup>
 
