@@ -9,7 +9,7 @@ public class SubscriptionLicense : BaseLicense
     [JsonConstructor]
     protected SubscriptionLicense()
     {
-        Type = LicenseType.Standard;
+        Type = LicenseType.Subscription;
     }
 
     public SubscriptionLicense(string userName, TimeSpan subscriptionDuration)

@@ -1,6 +1,9 @@
 {
   "culture": "en",
   "texts": {
+    "Product.Singular": "Product",
+    "Product.Plural": "Products",
+
     // Product 1
     "Product1": "Product 1",
     "Product1.Feature1": "P1.F1",

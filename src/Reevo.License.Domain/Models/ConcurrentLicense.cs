@@ -3,6 +3,9 @@ using Reevo.License.Domain.Shared.Enum;
 
 namespace Reevo.License.Domain.Models;
 
+/// <summary>
+/// This license allows a specific number of users to use the software concurrently.
+/// </summary>
 [JsonDerivedType(typeof(ConcurrentLicense), "Concurrent")]
 public class ConcurrentLicense : BaseLicense
 {

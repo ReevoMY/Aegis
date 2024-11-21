@@ -86,9 +86,11 @@ public static class LicenseValidator
             return false;
         }
 
-        return licenseObj is NodeLockedLicense license &&
+        var result = licenseObj is NodeLockedLicense license &&
                (!license.ExpirationDate.HasValue || !(license.ExpirationDate < DateTime.UtcNow)) &&
                HardwareUtils.ValidateHardwareId(hardwareId ?? license.HardwareId);
+
+        return result;
     }
 
     /// <summary>

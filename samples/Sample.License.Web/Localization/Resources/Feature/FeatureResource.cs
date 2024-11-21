@@ -2,7 +2,7 @@
 
 namespace Sample.License.Web.Localization;
 
-[LocalizationResourceName("Features")]
-public class FeaturesResource
+[LocalizationResourceName("Feature")]
+public class FeatureResource
 {
 }

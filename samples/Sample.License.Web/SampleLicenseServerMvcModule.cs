@@ -64,10 +64,10 @@ public class SampleLicenseServerMvcModule : AbpModule
         });
         Configure<AbpLocalizationOptions>(options =>
         {
-            options.DefaultResourceType = typeof(FeaturesResource);
+            //options.DefaultResourceType = typeof(FeatureTextResource);
             options.Resources
-                .Add<FeaturesResource>("en")
-                .AddVirtualJson("/Localization/Resources/Features");
+                .Add<FeatureResource>("en")
+                .AddVirtualJson("/Localization/Resources/Feature");
         });
     }
 

@@ -19,7 +19,7 @@ public class SampleFeatureDefinitionProvider : FeatureDefinitionProvider
             "Product1.Feature1",
             defaultValue: "false",
             displayName: LocalizableString
-                .Create<FeaturesResource>("Product1.Feature1"),
+                .Create<FeatureResource>("Product1.Feature1"),
             valueType: new ToggleStringValueType()
         );
 
@@ -27,7 +27,7 @@ public class SampleFeatureDefinitionProvider : FeatureDefinitionProvider
             "Product1.Feature1.Child1",
             defaultValue: "false",
             displayName: LocalizableString
-                .Create<FeaturesResource>("Product1.Feature1.Child1"),
+                .Create<FeatureResource>("Product1.Feature1.Child1"),
             valueType: new ToggleStringValueType()
         );
 
@@ -35,7 +35,7 @@ public class SampleFeatureDefinitionProvider : FeatureDefinitionProvider
             "Product1.Feature1.Child2",
             defaultValue: "false",
             displayName: LocalizableString
-                .Create<FeaturesResource>("Product1.Feature1.Child2"),
+                .Create<FeatureResource>("Product1.Feature1.Child2"),
             valueType: new ToggleStringValueType()
         );
 
@@ -43,7 +43,7 @@ public class SampleFeatureDefinitionProvider : FeatureDefinitionProvider
             "Product1.Feature2",
             defaultValue: "false",
             displayName: LocalizableString
-                .Create<FeaturesResource>("Product1.Feature2"),
+                .Create<FeatureResource>("Product1.Feature2"),
             valueType: new ToggleStringValueType()
         );
 
@@ -51,7 +51,7 @@ public class SampleFeatureDefinitionProvider : FeatureDefinitionProvider
             "Product1.Feature2.Child1",
             defaultValue: "false",
             displayName: LocalizableString
-                .Create<FeaturesResource>("Product1.Feature2.Child1"),
+                .Create<FeatureResource>("Product1.Feature2.Child1"),
             valueType: new ToggleStringValueType()
         );
         #endregion
@@ -63,7 +63,7 @@ public class SampleFeatureDefinitionProvider : FeatureDefinitionProvider
             "Product2.Feature1",
             defaultValue: "false",
             displayName: LocalizableString
-                .Create<FeaturesResource>("Product2.Feature1"),
+                .Create<FeatureResource>("Product2.Feature1"),
             valueType: new ToggleStringValueType()
         );
 
@@ -71,7 +71,7 @@ public class SampleFeatureDefinitionProvider : FeatureDefinitionProvider
             "Product2.Feature1.Child1",
             defaultValue: "false",
             displayName: LocalizableString
-                .Create<FeaturesResource>("Product2.Feature1.Child1"),
+                .Create<FeatureResource>("Product2.Feature1.Child1"),
             valueType: new ToggleStringValueType()
         );
 
@@ -79,7 +79,7 @@ public class SampleFeatureDefinitionProvider : FeatureDefinitionProvider
             "Product2.Feature1.Child2",
             defaultValue: "false",
             displayName: LocalizableString
-                .Create<FeaturesResource>("Product2.Feature1.Child2"),
+                .Create<FeatureResource>("Product2.Feature1.Child2"),
             valueType: new ToggleStringValueType()
         );
 
@@ -87,7 +87,7 @@ public class SampleFeatureDefinitionProvider : FeatureDefinitionProvider
             "Product2.Feature2",
             defaultValue: "false",
             displayName: LocalizableString
-                .Create<FeaturesResource>("Product2.Feature2"),
+                .Create<FeatureResource>("Product2.Feature2"),
             valueType: new ToggleStringValueType()
         );
 
@@ -95,7 +95,7 @@ public class SampleFeatureDefinitionProvider : FeatureDefinitionProvider
             "Product2.Feature2.Child1",
             defaultValue: "false",
             displayName: LocalizableString
-                .Create<FeaturesResource>("Product2.Feature2.Child1"),
+                .Create<FeatureResource>("Product2.Feature2.Child1"),
             valueType: new ToggleStringValueType()
         );
         #endregion

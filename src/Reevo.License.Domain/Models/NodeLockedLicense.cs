@@ -9,6 +9,7 @@ public class NodeLockedLicense : BaseLicense
     [JsonConstructor]
     public NodeLockedLicense()
     {
+        HardwareId = string.Empty;
         Type = LicenseType.NodeLocked;
     }
 
@@ -31,5 +32,12 @@ public class NodeLockedLicense : BaseLicense
         IssuedOn = license.IssuedOn;
     }
 
-    [JsonInclude] public string HardwareId { get; protected internal set; }
+    [JsonInclude]
+    public LicenseUser? User { get; protected init; }
+
+    [JsonInclude]
+    public string HardwareId { get; protected init; }
+
+    [JsonInclude]
+    public bool ValidateUserIpAddress { get; protected init; }
 }

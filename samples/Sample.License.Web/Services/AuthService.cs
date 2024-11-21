@@ -33,7 +33,10 @@ public class AuthService(ApplicationDbContext dbContext, IOptions<JwtSettings> o
         if (newUser.Password != newUser.ConfirmPassword ||
             await dbContext.Users.AnyAsync(x => x.Username == newUser.Username) ||
             await dbContext.Users.AnyAsync(x => x.Email == newUser.Email) ||
-            !await dbContext.Roles.AnyAsync(x => x.Name == newUser.Role)) return false;
+            !await dbContext.Roles.AnyAsync(x => x.Name == newUser.Role))
+        {
+            return false;
+        }
 
         var user = new User
         {

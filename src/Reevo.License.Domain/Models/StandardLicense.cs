@@ -3,7 +3,7 @@ using Reevo.License.Domain.Shared.Enum;
 
 namespace Reevo.License.Domain.Models;
 
-[JsonDerivedType(typeof(StandardLicense), "Standard")]
+[JsonDerivedType(typeof(StandardLicense), nameof(LicenseType.Standard))]
 public class StandardLicense : BaseLicense
 {
     [JsonConstructor]

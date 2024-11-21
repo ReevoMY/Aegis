@@ -35,7 +35,6 @@
 
   <ItemGroup>
     <Folder Include="Data\Migrations\" />
-    <Folder Include="Localization\Resources\Features\" />
     <Folder Include="Migrations\" />
   </ItemGroup>
 

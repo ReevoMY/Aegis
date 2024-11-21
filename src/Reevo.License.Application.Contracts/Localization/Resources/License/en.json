@@ -1,0 +1,23 @@
+{
+  "culture": "en",
+  "texts": {
+    "License.Singular": "License",
+    "License.Plural": "Licenses",
+
+    //#region License Types
+
+    "License.Types.Standard": "Standard",
+    "License.Types.Concurrent": "Concurrent",
+    "License.Types.NodeLocked": "Node-Locked",
+    "License.Types.Subscription": "Subscription",
+    "License.Types.Trial": "Trial",
+
+    //#endregion License Types
+
+    //#region License Generation
+
+    "License.LicenseGeneration.Error.InvalidLicense": "Invalid license."
+
+    //#endregion License Generation
+  }
+}

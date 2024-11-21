@@ -7,18 +7,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="Localization\Resources\Error\en.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DeviceId" Version="6.7.0" />
     <PackageReference Include="Volo.Abp.AuditLogging.Domain.Shared" Version="9.0.0-rc.3" />
     <PackageReference Include="Volo.Abp.BackgroundJobs.Domain.Shared" Version="9.0.0-rc.3" />
     <PackageReference Include="Volo.Abp.Core" Version="9.0.0-rc.3" />
+    <PackageReference Include="Volo.Abp.Ddd.Domain" Version="9.0.0-rc.3" />
     <PackageReference Include="Volo.Abp.FeatureManagement.Domain.Shared" Version="9.0.0-rc.3" />
     <PackageReference Include="Volo.Abp.Identity.Domain.Shared" Version="9.0.0-rc.3" />
     <PackageReference Include="Volo.Abp.PermissionManagement.Domain.Shared" Version="9.0.0-rc.3" />
     <PackageReference Include="Volo.Abp.SettingManagement.Domain.Shared" Version="9.0.0-rc.3" />
     <PackageReference Include="Volo.Abp.TenantManagement.Domain.Shared" Version="9.0.0-rc.3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Localization\" />
   </ItemGroup>
 
 </Project>

@@ -4,17 +4,17 @@ using Microsoft.Extensions.Localization;
 
 namespace Sample.License.Web.Tests.Localization;
 
-public class FeaturesLocalizationTests : SampleLicenseServerTestBase
+public class FeatureLocalizationTests : SampleLicenseServerTestBase
 {
     #region Fields
 
-    private readonly IStringLocalizer<FeaturesResource> _localizer;
+    private readonly IStringLocalizer<FeatureResource> _localizer;
 
     #endregion
 
-    public FeaturesLocalizationTests()
+    public FeatureLocalizationTests()
     {
-        _localizer = GetRequiredService<IStringLocalizer<FeaturesResource>>();
+        _localizer = GetRequiredService<IStringLocalizer<FeatureResource>>();
     }
 
     [Fact]
