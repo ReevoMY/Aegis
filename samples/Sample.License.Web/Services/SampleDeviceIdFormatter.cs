@@ -12,7 +12,7 @@ namespace Sample.License.Web.Services;
 /// An example implementation of <see cref="IDeviceIdFormatter"/> that combines the components into a hash.
 /// </summary>
 [Dependency(ServiceLifetime.Transient, ReplaceServices = true)]
-[ExposeServices(typeof(IDeviceIdFormatter))]
+//[ExposeServices(typeof(IDeviceIdFormatter))]
 public class SampleDeviceIdFormatter : IDeviceIdFormatter
 {
     #region Fields

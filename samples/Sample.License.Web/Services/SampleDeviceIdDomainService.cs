@@ -2,7 +2,6 @@
 using DeviceId.Encoders;
 using Reevo.License.Domain.Service;
 using Reevo.License.Domain.Shared.Service;
-using System.Numerics;
 using Volo.Abp.DependencyInjection;
 
 namespace Sample.License.Web.Services;
@@ -28,8 +27,17 @@ public class SampleDeviceIdDomainService : DeviceIdDomainService
     {
         var deviceId = new DeviceIdBuilder()
             .AddMachineName()
-            .AddMacAddress(true, true)
             .AddFileToken(FileToken)
+            .OnWindows(windows => windows
+                .AddProcessorId()
+                .AddMotherboardSerialNumber()
+                .AddSystemUuid())
+            .OnLinux(linux => linux
+                .AddMotherboardSerialNumber()
+                .AddSystemDriveSerialNumber())
+            .OnMac(mac => mac
+                .AddSystemDriveSerialNumber()
+                .AddPlatformSerialNumber())
             .UseFormatter(_deviceIdFormatter)
             .ToString();
 

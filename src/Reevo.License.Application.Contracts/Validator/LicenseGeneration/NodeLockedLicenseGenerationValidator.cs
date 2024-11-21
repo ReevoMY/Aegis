@@ -17,8 +17,6 @@ public class NodeLockedLicenseGenerationValidator : LicenseGenerationValidator<N
         RuleFor(request => request.HardwareId)
             .Must(hardwareId => AsyncHelper.RunSync(() => deviceIdDomainService.VerifyDeviceIdAsync(hardwareId)));
 
-
-
         When(request => request.User != null, () =>
         {
             RuleFor(request => request.User)
