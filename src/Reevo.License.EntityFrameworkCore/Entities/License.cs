@@ -61,7 +61,7 @@ public class License : BasicAggregateRoot<Guid>
 
     [StringLength(LicenseConsts.MaxDeviceIdLength)]
     [Column(TypeName = LicenseConsts.DeviceIdDataType)]
-    public string? DeviceId { get; set; } = string.Empty;
+    public string? DeviceId { get; set; }
 
     public DateTime? SubscriptionExpiryDate { get; set; }
 

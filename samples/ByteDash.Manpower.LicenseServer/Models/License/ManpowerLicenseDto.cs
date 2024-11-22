@@ -8,6 +8,8 @@ public class ManpowerLicenseDto
 
     public string LicenseKey { get; set; } = null!;
 
+    public LicenseType LicenseType { get; set; }
+
     public string? Description { get; set; }
 
     public string? Version { get; set; }
@@ -22,7 +24,5 @@ public class ManpowerLicenseDto
 
     public LicenseStatus Status { get; set; }
 
-    public int? MaxActiveUsersCount { get; init; }
-
-    public int? ActiveUsersCount { get; set; }
+    public string? DeviceId { get; set; }
 }
