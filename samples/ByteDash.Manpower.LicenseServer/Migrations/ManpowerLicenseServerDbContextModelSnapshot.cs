@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Volo.Abp.EntityFrameworkCore;
 
 #nullable disable
 
@@ -18,7 +17,6 @@ namespace ByteDash.Manpower.LicenseServer.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("_Abp_DatabaseProvider", EfCoreDatabaseProvider.SqlServer)
                 .HasAnnotation("ProductVersion", "9.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
@@ -27,6 +25,7 @@ namespace ByteDash.Manpower.LicenseServer.Migrations
             modelBuilder.Entity("ByteDash.Manpower.LicenseServer.Entities.License.ManpowerLicense", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int?>("ActiveUsersCount")
@@ -76,7 +75,7 @@ namespace ByteDash.Manpower.LicenseServer.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Licenses");
+                    b.ToTable("AppLicenses", (string)null);
                 });
 #pragma warning restore 612, 618
         }

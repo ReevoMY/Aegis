@@ -12,7 +12,7 @@ namespace ByteDash.Manpower.LicenseServer.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Licenses",
+                name: "AppLicenses",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -31,7 +31,7 @@ namespace ByteDash.Manpower.LicenseServer.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Licenses", x => x.Id);
+                    table.PrimaryKey("PK_AppLicenses", x => x.Id);
                 });
         }
 
@@ -39,7 +39,7 @@ namespace ByteDash.Manpower.LicenseServer.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Licenses");
+                name: "AppLicenses");
         }
     }
 }
