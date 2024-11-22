@@ -16,4 +16,7 @@ public class LicenseConsts
 
     public const int MaxVersionLength = 64;
     public const string VersionDataType = "nvarchar(64)";
+
+    public const int MaxDeviceIdLength = 64;
+    public const string DeviceIdDataType = "nvarchar(52)";
 }

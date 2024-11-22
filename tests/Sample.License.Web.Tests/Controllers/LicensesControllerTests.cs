@@ -18,7 +18,6 @@ using Sample.License.Web.Middlewares;
 using Sample.License.Web.Services;
 using Reevo.License.EntityFrameworkCore.DTOs;
 using Reevo.License.EntityFrameworkCore.Entities;
-using Reevo.License.EntityFrameworkCore.Enums;
 using Reevo.License.EntityFrameworkCore.Exceptions;
 using Reevo.License.EntityFrameworkCore.Services;
 using Reevo.License.Domain.Utilities;
@@ -471,7 +470,7 @@ public class LicensesControllerTests
 
         var updatedLicense = await _dbContext.Licenses.FindAsync(license.Id);
         updatedLicense!.Status.Should().Be(LicenseStatus.Active);
-        updatedLicense.HardwareId.Should().Be(hardwareId);;
+        updatedLicense.DeviceId.Should().Be(hardwareId);;
     }
 
     [Fact]
@@ -674,7 +673,7 @@ public class LicensesControllerTests
 
         var updatedLicense = await _dbContext.Licenses.FindAsync(license.Id);
         updatedLicense!.Status.Should().Be(LicenseStatus.Revoked);
-        updatedLicense.HardwareId.Should().BeNullOrEmpty();
+        updatedLicense.DeviceId.Should().BeNullOrEmpty();
     }
 
     [Fact]
@@ -1109,7 +1108,7 @@ public class LicensesControllerTests
             Type = licenseType,
             ProductId = productId,
             IssuedTo = "Test User",
-            HardwareId = hardwareId,
+            DeviceId = hardwareId,
             MaxActiveUsersCount = maxActivations,
             IssuedOn = DateTime.UtcNow,
             ExpirationDate = expirationDate,
@@ -1141,7 +1140,7 @@ public class LicensesControllerTests
             LicenseType.Trial => LicenseManager.SaveLicense(new TrialLicense(baseLicense,
                 license.ExpirationDate!.Value - DateTime.UtcNow)),
             LicenseType.NodeLocked => LicenseManager.SaveLicense(
-                new NodeLockedLicense(baseLicense, license.HardwareId!)),
+                new NodeLockedLicense(baseLicense, license.DeviceId!)),
             LicenseType.Subscription => LicenseManager.SaveLicense(new SubscriptionLicense(baseLicense,
                 license.IssuedTo,
                 license.ExpirationDate!.Value - DateTime.UtcNow)),

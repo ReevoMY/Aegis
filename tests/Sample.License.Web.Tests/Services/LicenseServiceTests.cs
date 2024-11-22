@@ -6,7 +6,6 @@ using Sample.License.Web.Entities;
 using Reevo.License.EntityFrameworkCore.Data;
 using Reevo.License.EntityFrameworkCore.DTOs;
 using Reevo.License.EntityFrameworkCore.Entities;
-using Reevo.License.EntityFrameworkCore.Enums;
 using Reevo.License.EntityFrameworkCore.Exceptions;
 using Reevo.License.EntityFrameworkCore.Services;
 using Reevo.License.Domain.Utilities;
@@ -288,7 +287,7 @@ public class LicenseServiceTests
 
         var updatedLicense = await _dbContext.Licenses.FindAsync(license.Id);
         updatedLicense!.Status.Should().Be(LicenseStatus.Active);
-        updatedLicense.HardwareId.Should().Be(hardwareId);
+        updatedLicense.DeviceId.Should().Be(hardwareId);
     }
 
     [Fact]
@@ -471,7 +470,7 @@ public class LicenseServiceTests
 
         var updatedLicense = await _dbContext.Licenses.FindAsync(license.Id);
         updatedLicense!.Status.Should().Be(LicenseStatus.Revoked);
-        updatedLicense.HardwareId.Should().BeNull();
+        updatedLicense.DeviceId.Should().BeNull();
     }
 
     [Fact]
@@ -731,7 +730,7 @@ public class LicenseServiceTests
             Type = licenseType,
             ProductId = productId,
             IssuedTo = "Test User",
-            HardwareId = hardwareId,
+            DeviceId = hardwareId,
             MaxActiveUsersCount = maxActivations,
             IssuedOn = DateTime.UtcNow,
             ExpirationDate = expirationDate,
@@ -763,7 +762,7 @@ public class LicenseServiceTests
             LicenseType.Trial => LicenseManager.SaveLicense(new TrialLicense(baseLicense,
                 license.ExpirationDate!.Value - DateTime.UtcNow)),
             LicenseType.NodeLocked => LicenseManager.SaveLicense(
-                new NodeLockedLicense(baseLicense, license.HardwareId!)),
+                new NodeLockedLicense(baseLicense, license.DeviceId!)),
             LicenseType.Subscription => LicenseManager.SaveLicense(new SubscriptionLicense(baseLicense,
                 license.IssuedTo,
                 license.ExpirationDate!.Value - DateTime.UtcNow)),

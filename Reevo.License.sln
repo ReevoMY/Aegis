@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reevo.License.Application",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Reevo.License.Application.Contracts", "src\Reevo.License.Application.Contracts\Reevo.License.Application.Contracts.csproj", "{4019F099-53A9-4515-B5CF-882CB041776D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ByteDash.Manpower.LicenseServer", "samples\ByteDash.Manpower.LicenseServer\ByteDash.Manpower.LicenseServer.csproj", "{29962BA3-DE62-4960-BF91-81CD307E637B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,10 @@ Global
 		{4019F099-53A9-4515-B5CF-882CB041776D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4019F099-53A9-4515-B5CF-882CB041776D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4019F099-53A9-4515-B5CF-882CB041776D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29962BA3-DE62-4960-BF91-81CD307E637B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29962BA3-DE62-4960-BF91-81CD307E637B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29962BA3-DE62-4960-BF91-81CD307E637B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29962BA3-DE62-4960-BF91-81CD307E637B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -97,5 +103,6 @@ Global
 		{2DE1A83E-9166-4197-831F-4C17BCB78B89} = {BFC52FAE-C62E-416F-88EE-43279AFE14E0}
 		{EE581B20-A889-4AEE-88D1-CA8625A73B0C} = {9BB04FC3-081B-4A3F-B1BC-2D82C25F3975}
 		{4019F099-53A9-4515-B5CF-882CB041776D} = {9BB04FC3-081B-4A3F-B1BC-2D82C25F3975}
+		{29962BA3-DE62-4960-BF91-81CD307E637B} = {3B4518B1-BE92-40B8-A2D1-ABB73DF6FAC6}
 	EndGlobalSection
 EndGlobal

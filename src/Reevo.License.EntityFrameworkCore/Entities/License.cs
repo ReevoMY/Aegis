@@ -3,7 +3,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Reevo.License.Domain.Shared.Enum;
 using Ardalis.GuardClauses;
 using Reevo.License.Domain.Shared.Model;
-using Reevo.License.EntityFrameworkCore.Enums;
 using Volo.Abp.Domain.Entities;
 
 namespace Reevo.License.EntityFrameworkCore.Entities;
@@ -60,7 +59,9 @@ public class License : BasicAggregateRoot<Guid>
 
     public int? ActiveUsersCount { get; set; }
 
-    public string? HardwareId { get; set; } = string.Empty;
+    [StringLength(LicenseConsts.MaxDeviceIdLength)]
+    [Column(TypeName = LicenseConsts.DeviceIdDataType)]
+    public string? DeviceId { get; set; } = string.Empty;
 
     public DateTime? SubscriptionExpiryDate { get; set; }
 

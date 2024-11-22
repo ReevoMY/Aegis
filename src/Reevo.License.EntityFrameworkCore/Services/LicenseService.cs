@@ -6,7 +6,6 @@ using Reevo.License.Domain.Models;
 using Reevo.License.EntityFrameworkCore.Data;
 using Reevo.License.EntityFrameworkCore.DTOs;
 using Reevo.License.EntityFrameworkCore.Entities;
-using Reevo.License.EntityFrameworkCore.Enums;
 using Reevo.License.EntityFrameworkCore.Exceptions;
 
 namespace Reevo.License.EntityFrameworkCore.Services;
@@ -163,7 +162,7 @@ public class LicenseService(LicenseDbContext dbContext)
                 break;
             case LicenseType.NodeLocked:
                 license.Status = LicenseStatus.Active;
-                license.HardwareId = hardwareId!;
+                license.DeviceId = hardwareId!;
                 break;
             case LicenseType.Concurrent:
                 if (license.ActiveUsersCount >= license.MaxActiveUsersCount)
@@ -314,7 +313,7 @@ public class LicenseService(LicenseDbContext dbContext)
 
             case LicenseType.NodeLocked:
                 license.Status = LicenseStatus.Revoked;
-                license.HardwareId = null;
+                license.DeviceId = null;
                 dbContext.Licenses.Update(license);
                 await dbContext.SaveChangesAsync();
                 return new LicenseDeactivationResult(true);
@@ -408,7 +407,7 @@ public class LicenseService(LicenseDbContext dbContext)
             SubscriptionExpiryDate = request.SubscriptionDuration != null
                 ? DateTime.UtcNow.Add(request.SubscriptionDuration!.Value)
                 : null,
-            HardwareId = request.HardwareId
+            DeviceId = request.HardwareId
         };
     }
 
@@ -458,7 +457,7 @@ public class LicenseService(LicenseDbContext dbContext)
                 license.ExpirationDate!.Value - DateTime.UtcNow)),
             LicenseType.NodeLocked => LicenseManager.SaveLicense(new NodeLockedLicense(
                 baseLicense,
-                license.HardwareId!)),
+                license.DeviceId!)),
             LicenseType.Subscription => LicenseManager.SaveLicense(new SubscriptionLicense(
                 baseLicense,
                 license.IssuedTo,
