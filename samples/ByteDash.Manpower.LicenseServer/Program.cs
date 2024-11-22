@@ -1,5 +1,5 @@
 ﻿using ByteDash.Manpower.LicenseServer;
-using ByteDash.Manpower.LicenseServer.Data.Migrations;
+using ByteDash.Manpower.LicenseServer.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

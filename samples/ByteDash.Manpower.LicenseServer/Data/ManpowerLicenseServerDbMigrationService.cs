@@ -8,7 +8,7 @@ using Volo.Abp.Identity;
 using Volo.Abp.MultiTenancy;
 using Volo.Abp.TenantManagement;
 
-namespace ByteDash.Manpower.LicenseServer.Data.Migrations;
+namespace ByteDash.Manpower.LicenseServer.Data;
 
 public class ManpowerLicenseServerDbMigrationService : ITransientDependency
 {

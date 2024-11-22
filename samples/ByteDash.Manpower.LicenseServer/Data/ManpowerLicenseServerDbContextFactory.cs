@@ -1,9 +1,8 @@
-﻿using ByteDash.Manpower.LicenseServer.Data;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 
-namespace ByteDash.Manpower.LicenseServer;
+namespace ByteDash.Manpower.LicenseServer.Data;
 
 public class ManpowerLicenseServerDbContextFactory : IDesignTimeDbContextFactory<ManpowerLicenseServerDbContext>
 {

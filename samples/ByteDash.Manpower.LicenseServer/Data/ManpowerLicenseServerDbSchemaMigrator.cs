@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp.DependencyInjection;
 
-namespace ByteDash.Manpower.LicenseServer.Data.Migrations;
+namespace ByteDash.Manpower.LicenseServer.Data;
 
 public class ManpowerLicenseServerDbSchemaMigrator : ITransientDependency
 {
