@@ -12,7 +12,7 @@ namespace Sample.License.Web.Controllers;
 public class LicensesController(LicenseService licenseService) : AbpController
 {
     [HttpPost("generate")]
-    [AuthorizeMiddleware(["Admin"])]
+    //[AuthorizeMiddleware(["Admin"])]
     public async Task<IActionResult> Generate([FromBody] LicenseGenerationRequest request)
     {
         if (!ModelState.IsValid)
@@ -25,7 +25,7 @@ public class LicensesController(LicenseService licenseService) : AbpController
     }
 
     [HttpPost("validate")]
-    [AuthorizeMiddleware(["Admin", "User"])]
+    //[AuthorizeMiddleware(["Admin", "User"])]
     public async Task<IActionResult> Validate(
         [FromForm] string licenseKey,
         [FromForm] string validationParams = "{}",
@@ -52,7 +52,7 @@ public class LicensesController(LicenseService licenseService) : AbpController
     }
 
     [HttpPost("activate")]
-    [AuthorizeMiddleware(["Admin"])]
+    //[AuthorizeMiddleware(["Admin"])]
     public async Task<IActionResult> Activate([FromQuery] string licenseKey, [FromQuery] string? hardwareId = null)
     {
         var result = await licenseService.ActivateLicenseAsync(licenseKey, hardwareId);
@@ -60,7 +60,7 @@ public class LicensesController(LicenseService licenseService) : AbpController
     }
 
     [HttpPost("revoke")]
-    [AuthorizeMiddleware(["Admin"])]
+    //[AuthorizeMiddleware(["Admin"])]
     public async Task<IActionResult> Revoke([FromQuery] string licenseKey, [FromQuery] string? hardwareId = null)
     {
         var result = await licenseService.RevokeLicenseAsync(licenseKey, hardwareId);
@@ -68,7 +68,7 @@ public class LicensesController(LicenseService licenseService) : AbpController
     }
 
     [HttpPost("disconnect")]
-    [AuthorizeMiddleware(["User"])]
+    //[AuthorizeMiddleware(["User"])]
     public async Task<IActionResult> Disconnect([FromQuery] string licenseKey, [FromQuery] string? hardwareId = null)
     {
         var result = await licenseService.DisconnectConcurrentLicenseUser(licenseKey, hardwareId);
@@ -76,7 +76,7 @@ public class LicensesController(LicenseService licenseService) : AbpController
     }
 
     [HttpPost("renew")]
-    [AuthorizeMiddleware(["Admin"])]
+    //[AuthorizeMiddleware(["Admin"])]
     public async Task<IActionResult> RenewLicense([FromBody] RenewLicenseRequest request)
     {
         if (!ModelState.IsValid)
@@ -90,7 +90,7 @@ public class LicensesController(LicenseService licenseService) : AbpController
 
     [HttpPost("heartbeat")]
     [RateLimitingMiddleware(5, "00:10:00")]
-    [AuthorizeMiddleware(["User"])]
+    //[AuthorizeMiddleware(["User"])]
     public async Task<IActionResult> Heartbeat([FromBody] HeartbeatRequest request)
     {
         if (!ModelState.IsValid)
