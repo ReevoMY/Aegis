@@ -25,12 +25,88 @@ using Volo.Abp.Security.Claims;
 using Volo.Abp.AspNetCore.Mvc.Localization;
 using Volo.Abp.OpenIddict;
 using Serilog;
+using Volo.Abp.Account;
+using Volo.Abp.Account.Web;
+using Volo.Abp.Caching;
+using Volo.Abp.Swashbuckle;
+using Volo.Abp.AspNetCore.Serilog;
+using Volo.Abp.AuditLogging.EntityFrameworkCore;
+using Volo.Abp.EntityFrameworkCore.SqlServer;
+using Volo.Abp.FeatureManagement.EntityFrameworkCore;
+using Volo.Abp.FeatureManagement;
+using Volo.Abp.Identity.EntityFrameworkCore;
+using Volo.Abp.Identity.Web;
+using Volo.Abp.Identity;
+using Volo.Abp.OpenIddict.EntityFrameworkCore;
+using Volo.Abp.PermissionManagement.EntityFrameworkCore;
+using Volo.Abp.PermissionManagement.HttpApi;
+using Volo.Abp.PermissionManagement.Identity;
+using Volo.Abp.PermissionManagement.OpenIddict;
+using Volo.Abp.PermissionManagement.Web;
+using Volo.Abp.PermissionManagement;
+using Volo.Abp.SettingManagement.EntityFrameworkCore;
+using Volo.Abp.SettingManagement.Web;
+using Volo.Abp.SettingManagement;
+using Volo.Abp.TenantManagement.EntityFrameworkCore;
+using Volo.Abp.TenantManagement.Web;
+using Volo.Abp.TenantManagement;
 
 namespace ByteDash.Manpower.LicenseServer;
 
-[DependsOn(typeof(AbpAspNetCoreMvcModule),
+[DependsOn(
+    // ABP Framework Packages
+    typeof(AbpAspNetCoreMvcModule),
     typeof(AbpAutofacModule),
-    typeof(AbpLocalizationModule))]
+    typeof(AbpAutoMapperModule),
+    typeof(AbpCachingModule),
+    typeof(AbpSwashbuckleModule),
+    typeof(AbpAspNetCoreSerilogModule),
+    typeof(AbpLocalizationModule),
+
+    // Account module packages
+    typeof(AbpAccountWebOpenIddictModule),
+    typeof(AbpAccountHttpApiModule),
+    typeof(AbpAccountApplicationModule),
+
+
+    // Tenant Management module packages
+    typeof(AbpTenantManagementWebModule),
+    typeof(AbpTenantManagementHttpApiModule),
+    typeof(AbpTenantManagementApplicationModule),
+
+    // Identity module packages
+    typeof(AbpPermissionManagementDomainIdentityModule),
+    typeof(AbpPermissionManagementDomainOpenIddictModule),
+    typeof(AbpIdentityWebModule),
+    typeof(AbpIdentityHttpApiModule),
+    typeof(AbpIdentityApplicationModule),
+
+    // Permission Management module packages
+    typeof(AbpPermissionManagementWebModule),
+    typeof(AbpPermissionManagementApplicationModule),
+    typeof(AbpPermissionManagementHttpApiModule),
+
+    // Feature Management module packages
+    typeof(AbpFeatureManagementWebModule),
+    typeof(AbpFeatureManagementHttpApiModule),
+    typeof(AbpFeatureManagementApplicationModule),
+
+    // Setting Management module packages
+    typeof(AbpSettingManagementWebModule),
+    typeof(AbpSettingManagementHttpApiModule),
+    typeof(AbpSettingManagementApplicationModule),
+
+    // Entity Framework Core packages for the used modules
+    typeof(AbpAuditLoggingEntityFrameworkCoreModule),
+    typeof(AbpFeatureManagementEntityFrameworkCoreModule),
+    typeof(AbpIdentityEntityFrameworkCoreModule),
+    typeof(AbpOpenIddictEntityFrameworkCoreModule),
+    typeof(AbpTenantManagementEntityFrameworkCoreModule),
+    typeof(AbpPermissionManagementEntityFrameworkCoreModule),
+    typeof(AbpSettingManagementEntityFrameworkCoreModule),
+    typeof(AbpEntityFrameworkCoreSqlServerModule)
+
+)]
 public class ManpowerLicenseServerModule : AbpModule
 {
     /* Single point to enable/disable multi-tenancy */
