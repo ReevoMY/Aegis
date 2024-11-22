@@ -1,0 +1,68 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="C:\Users\SOHA007\.nuget\packages\volo.abp.aspnetcore.mvc\9.0.0\contentFiles\any\net9.0\Volo.Abp.AspNetCore.Mvc.abppkg.analyze.json" />
+    <Content Remove="C:\Users\SOHA007\.nuget\packages\volo.abp.aspnetcore.serilog\9.0.0\contentFiles\any\net9.0\Volo.Abp.AspNetCore.Serilog.abppkg.analyze.json" />
+    <Content Remove="C:\Users\SOHA007\.nuget\packages\volo.abp.identity.aspnetcore\9.0.0\contentFiles\any\net9.0\Volo.Abp.Identity.AspNetCore.abppkg.analyze.json" />
+    <Content Remove="C:\Users\SOHA007\.nuget\packages\volo.abp.openiddict.aspnetcore\9.0.0\contentFiles\any\net9.0\Volo.Abp.OpenIddict.AspNetCore.abppkg.analyze.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.Development.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="9.0.0.0" />
+    <PackageReference Include="MiniProfiler.AspNetCore.Mvc" Version="4.3.8" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Volo.Abp.AspNetCore.Mvc" Version="9.0.0" />
+    <PackageReference Include="Volo.Abp.Autofac" Version="9.0.0" />
+    <PackageReference Include="Volo.Abp.AutoMapper" Version="9.0.0" />
+    <PackageReference Include="Volo.Abp.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Volo.Abp.EntityFrameworkCore.SqlServer" Version="9.0.0" />
+    <PackageReference Include="Volo.Abp.Identity.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Volo.Abp.Identity.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Volo.Abp.OpenIddict.AspNetCore" Version="9.0.0" />
+    <PackageReference Include="Volo.Abp.OpenIddict.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Volo.Abp.PermissionManagement.Domain.OpenIddict" Version="9.0.0" />
+    <PackageReference Include="Volo.Abp.Swashbuckle" Version="9.0.0" />
+    <PackageReference Include="Volo.Abp.AspNetCore.Serilog" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      <PrivateAssets>compile; contentFiles; build; buildMultitargeting; buildTransitive; analyzers; native</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+    
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Reevo.License.EntityFrameworkCore\Reevo.License.EntityFrameworkCore.csproj" />
+  </ItemGroup>
+
+</Project>

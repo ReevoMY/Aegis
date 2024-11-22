@@ -7,8 +7,8 @@ using Volo.Abp.AspNetCore.Mvc;
 
 namespace Sample.License.Web.Controllers;
 
-[Route("api/[controller]")]
 [ApiController]
+[Route("api/[controller]")]
 public class LicensesController(LicenseService licenseService) : AbpController
 {
     [HttpPost("generate")]
