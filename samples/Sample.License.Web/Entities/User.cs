@@ -18,7 +18,7 @@ public class User
     public string ApiKey { get; set; } = string.Empty;
 
     // Navigation Properties
-    public ICollection<MyLicense> Licenses { get; set; } = [];
+    public ICollection<DerivedLicense> Licenses { get; set; } = [];
     public ICollection<Product> Products { get; set; } = [];
     public int RefreshTokenId { get; set; }
     public RefreshToken RefreshToken { get; set; }

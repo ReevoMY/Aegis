@@ -1104,7 +1104,7 @@ public class LicensesControllerTests
     {
         var productId = _dbContext.Products.First().ProductId;
         var licenseFeature = _dbContext.LicenseFeatures.First();
-        var license = new MyLicense
+        var license = new DerivedLicense
         {
             Type = licenseType,
             ProductId = productId,
