@@ -13,7 +13,7 @@ using Volo.Abp.EntityFrameworkCore;
 namespace ByteDash.Manpower.LicenseServer.Migrations
 {
     [DbContext(typeof(LicenseServerDbContext))]
-    [Migration("20241122134819_Initial")]
+    [Migration("20241122142919_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

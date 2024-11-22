@@ -116,10 +116,10 @@ namespace ByteDash.Manpower.LicenseServer;
     typeof(BlobStoringDatabaseEntityFrameworkCoreModule),
     typeof(AbpEntityFrameworkCoreSqlServerModule)
 )]
-public class LicenseServerModule : AbpModule
+public class ManpowerLicenseServerModule : AbpModule
 {
     /* Single point to enable/disable multi-tenancy */
-    private const bool IsMultiTenant = true;
+    private const bool IsMultiTenant = false;
 
     public override void PreConfigureServices(ServiceConfigurationContext context)
     {
@@ -272,11 +272,11 @@ public class LicenseServerModule : AbpModule
     {
         Configure<AbpVirtualFileSystemOptions>(options =>
         {
-            options.FileSets.AddEmbedded<LicenseServerModule>();
+            options.FileSets.AddEmbedded<ManpowerLicenseServerModule>();
             if (hostingEnvironment.IsDevelopment())
             {
                 /* Using physical files in development, so we don't need to recompile on changes */
-                options.FileSets.ReplaceEmbeddedByPhysical<LicenseServerModule>(hostingEnvironment.ContentRootPath);
+                options.FileSets.ReplaceEmbeddedByPhysical<ManpowerLicenseServerModule>(hostingEnvironment.ContentRootPath);
             }
         });
     }
@@ -285,7 +285,7 @@ public class LicenseServerModule : AbpModule
     {
         Configure<AbpAspNetCoreMvcOptions>(options =>
         {
-            options.ConventionalControllers.Create(typeof(LicenseServerModule).Assembly);
+            options.ConventionalControllers.Create(typeof(ManpowerLicenseServerModule).Assembly);
         });
     }
 
@@ -303,14 +303,14 @@ public class LicenseServerModule : AbpModule
 
     private void ConfigureAutoMapper(ServiceConfigurationContext context)
     {
-        context.Services.AddAutoMapperObjectMapper<LicenseServerModule>();
+        context.Services.AddAutoMapperObjectMapper<ManpowerLicenseServerModule>();
         Configure<AbpAutoMapperOptions>(options =>
         {
             /* Uncomment `validate: true` if you want to enable the Configuration Validation feature.
              * See AutoMapper's documentation to learn what it is:
              * https://docs.automapper.org/en/stable/Configuration-validation.html
              */
-            options.AddMaps<LicenseServerModule>(/* validate: true */);
+            options.AddMaps<ManpowerLicenseServerModule>(/* validate: true */);
         });
     }
 

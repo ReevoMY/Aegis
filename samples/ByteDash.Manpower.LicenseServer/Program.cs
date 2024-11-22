@@ -47,7 +47,7 @@ public class Program
             {
                 builder.Services.AddDataMigrationEnvironment();
             }
-            await builder.AddApplicationAsync<LicenseServerModule>();
+            await builder.AddApplicationAsync<ManpowerLicenseServerModule>();
             var app = builder.Build();
             await app.InitializeApplicationAsync();
 
