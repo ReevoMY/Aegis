@@ -303,4 +303,5 @@ paket-files/
 *.db-wal
 
 # Use abp install-libs to restore.
+**/wwwroot/lib/*
 **/wwwroot/libs/*

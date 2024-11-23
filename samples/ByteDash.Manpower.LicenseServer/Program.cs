@@ -1,3 +1,4 @@
+using ByteDash.Manpower.LicenseServer;
 using ByteDash.Manpower.LicenseServer.Data;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -16,30 +17,15 @@ public class Program
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Host.AddAppSettingsSecretsJson()
+                .UseAutofac()
                 .UseSerilog();
             if (IsMigrateDatabase(args))
             {
                 builder.Services.AddDataMigrationEnvironment();
             }
-            builder.Services.AddControllers();
-            builder.Services.AddDbContext<ManpowerLicenseServerDbContext>(options =>
-            {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("Default"));
-            });
-            builder.Services.AddOpenApi();
-
+            await builder.AddApplicationAsync<ManpowerLicenseServerModule>();
             var app = builder.Build();
-
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.MapOpenApi();
-                app.UseSwaggerUI(options => { options.SwaggerEndpoint("/openapi/v1.json", "License Server API"); });
-            }
-
-            app.UseHttpsRedirection();
-            app.UseAuthorization();
-            app.MapControllers();
+            await app.InitializeApplicationAsync();
 
             Log.Information("Starting ByteDash.Manpower.LicenseServer.");
             await app.RunAsync();

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace ByteDash.Manpower.LicenseServer.Migrations
 {
     [DbContext(typeof(ManpowerLicenseServerDbContext))]
-    [Migration("20241122211245_Initial")]
+    [Migration("20241122224715_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

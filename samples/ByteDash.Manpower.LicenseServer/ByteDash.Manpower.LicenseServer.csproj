@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+    <PackageReference Include="Volo.Abp.Autofac" Version="9.0.0" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
     <PackageReference Include="Serilog.Sinks.Async" Version="2.1.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="7.0.0" />
@@ -17,7 +17,11 @@
     <PackageReference Include="Volo.Abp.AspNetCore.Mvc" Version="9.0.0" />
     <PackageReference Include="Volo.Abp.Autofac" Version="9.0.0" />
     <PackageReference Include="Volo.Abp.AutoMapper" Version="9.0.0" />
+    <PackageReference Include="Volo.Abp.Swashbuckle" Version="9.0.0" />
     <PackageReference Include="Volo.Abp.AspNetCore.Serilog" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Volo.Abp.EntityFrameworkCore.SqlServer" Version="9.0.0" />
   </ItemGroup>
 
@@ -34,6 +38,38 @@
 
   <ItemGroup>
     <Folder Include="Migrations\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\lib\abp\core\abp.resourcemapping.js" />
+    <None Include="wwwroot\lib\abp\core\abp.resourcemapping.min.js" />
+    <None Include="wwwroot\lib\abp\core\readme.md" />
+    <None Include="wwwroot\lib\abp\core\src\abp.css" />
+    <None Include="wwwroot\lib\abp\core\src\abp.js" />
+    <None Include="wwwroot\lib\abp\core\src\abp.min.css" />
+    <None Include="wwwroot\lib\abp\core\src\abp.min.js" />
+    <None Include="wwwroot\lib\abp\utils\abp.resourcemapping.js" />
+    <None Include="wwwroot\lib\abp\utils\abp.resourcemapping.min.js" />
+    <None Include="wwwroot\lib\abp\utils\dist\abp-utils.d.ts" />
+    <None Include="wwwroot\lib\abp\utils\dist\bundles\abp-utils.umd.js" />
+    <None Include="wwwroot\lib\abp\utils\dist\bundles\abp-utils.umd.js.map" />
+    <None Include="wwwroot\lib\abp\utils\dist\bundles\abp-utils.umd.min.js" />
+    <None Include="wwwroot\lib\abp\utils\dist\bundles\abp-utils.umd.min.js.map" />
+    <None Include="wwwroot\lib\abp\utils\dist\esm2015\abp-utils.js" />
+    <None Include="wwwroot\lib\abp\utils\dist\esm2015\abp-utils.min.js" />
+    <None Include="wwwroot\lib\abp\utils\dist\esm2015\lib\linked-list.js" />
+    <None Include="wwwroot\lib\abp\utils\dist\esm2015\lib\linked-list.min.js" />
+    <None Include="wwwroot\lib\abp\utils\dist\esm2015\public-api.js" />
+    <None Include="wwwroot\lib\abp\utils\dist\esm2015\public-api.min.js" />
+    <None Include="wwwroot\lib\abp\utils\dist\fesm2015\abp-utils.js" />
+    <None Include="wwwroot\lib\abp\utils\dist\fesm2015\abp-utils.js.map" />
+    <None Include="wwwroot\lib\abp\utils\dist\fesm2015\abp-utils.min.js" />
+    <None Include="wwwroot\lib\abp\utils\dist\lib\linked-list.d.ts" />
+    <None Include="wwwroot\lib\abp\utils\dist\public-api.d.ts" />
+    <None Include="wwwroot\lib\abp\utils\dist\readme.md" />
+    <None Include="wwwroot\lib\abp\utils\ngcc.config.js" />
+    <None Include="wwwroot\lib\abp\utils\ngcc.config.min.js" />
+    <None Include="wwwroot\lib\abp\utils\readme.md" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,16 @@
+{
+  "version": "3.0",
+  "defaultProvider": "cdnjs",
+  "libraries": [
+    {
+      "provider": "jsdelivr",
+      "library": "@abp/core@9.0.0",
+      "destination": "wwwroot/lib/abp/core/"
+    },
+    {
+      "provider": "jsdelivr",
+      "library": "@abp/utils@9.0.0",
+      "destination": "wwwroot/lib/abp/utils/"
+    }
+  ]
+}

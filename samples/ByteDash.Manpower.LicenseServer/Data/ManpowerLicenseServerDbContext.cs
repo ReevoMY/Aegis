@@ -9,7 +9,7 @@ public class ManpowerLicenseServerDbContext(DbContextOptions<ManpowerLicenseServ
     : AbpDbContext<ManpowerLicenseServerDbContext>(options)
 {
     public const string DbTablePrefix = "App";
-    public const string DbSchema = null;
+    public const string DbSchema = null!;
 
     #region Properties
 
@@ -19,6 +19,8 @@ public class ManpowerLicenseServerDbContext(DbContextOptions<ManpowerLicenseServ
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
+        //builder.ConfigureTenantManagement();
+
         builder.Entity<ManpowerLicense>(b =>
         {
             b.ToTable(DbTablePrefix + nameof(Licenses),
