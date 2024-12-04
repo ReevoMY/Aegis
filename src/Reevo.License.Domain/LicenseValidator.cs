@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Json;
 using Reevo.License.Domain.Exceptions;
 using Reevo.License.Domain.Interfaces;
 using Reevo.License.Domain.Models;
@@ -158,7 +159,7 @@ public static class LicenseValidator
         license = null;
 
         // Split the license data into its components
-        var (hash, signature, encryptedData, aesKey) = SplitLicenseData(licenseData);
+        var (hash, signature, encryptedData) = SplitLicenseData(licenseData);
 
         // Verify the RSA signature
         if (!SecurityUtils.VerifySignature(hash, signature, LicenseUtils.GetLicensingSecrets().PublicKey))
@@ -185,7 +186,8 @@ public static class LicenseValidator
         }
 
         // Decrypt the license data using AES
-        var decryptedData = SecurityUtils.DecryptData(encryptedData, aesKey);
+        var hardwareId = HardwareUtils.GetHardwareId();
+        var decryptedData = SecurityUtils.DecryptData(encryptedData, hardwareId);
 
         // Deserialize the license object
         license = JsonSerializer.Deserialize<BaseLicense>(decryptedData);
@@ -193,8 +195,7 @@ public static class LicenseValidator
         return license != null;
     }
     
-    internal static (byte[] hash, byte[] signature, byte[] encryptedData, byte[] aesKey) SplitLicenseData(
-        byte[] licenseData)
+    internal static (byte[] hash, byte[] signature, byte[] encryptedData) SplitLicenseData(byte[] licenseData)
     {
         try
         {
@@ -219,15 +220,15 @@ public static class LicenseValidator
             offset += 4;
             var encryptedData = new byte[encryptedDataLength];
             Array.Copy(licenseData, offset, encryptedData, 0, encryptedDataLength);
-            offset += encryptedDataLength;
+            //offset += encryptedDataLength;
 
-            // Extract AES key
-            var aesKeyLength = BitConverter.ToInt32(licenseData, offset);
-            offset += 4;
-            var aesKey = new byte[aesKeyLength];
-            Array.Copy(licenseData, offset, aesKey, 0, aesKeyLength);
+            //// Extract AES key
+            //var aesLength = BitConverter.ToInt32(licenseData, offset);
+            //offset += 4;
+            //var passphraseKey = new byte[aesLength];
+            //Array.Copy(licenseData, offset, passphraseKey, 0, aesLength);
 
-            return (hash, signature, encryptedData, aesKey);
+            return (hash, signature, encryptedData);
         }
         catch (Exception ex)
         {

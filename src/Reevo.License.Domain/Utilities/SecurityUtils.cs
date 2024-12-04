@@ -48,10 +48,16 @@ public static class SecurityUtils
         return aes.Key;
     }
 
-    internal static byte[] EncryptData(byte[] data, byte[] key)
+    internal static byte[] EncryptData(byte[] data, string passphrase)
     {
         Guard.Against.Null(data, nameof(data));
-        Guard.Against.Null(key, nameof(key));
+        Guard.Against.Null(passphrase, nameof(passphrase));
+
+        // Derive a 32-byte key from the passphrase using PBKDF2 with SHA-256
+        var salt = new byte[16];
+        RandomNumberGenerator.Fill(salt);
+        using var deriveBytes = new Rfc2898DeriveBytes(passphrase, salt, 10000, HashAlgorithmName.SHA256);
+        var key = deriveBytes.GetBytes(32);
 
         using var aes = Aes.Create();
         aes.Key = key;
@@ -64,20 +70,26 @@ public static class SecurityUtils
         }
 
         var encryptedData = ms.ToArray();
-        return CombineByteArrays(aes.IV, encryptedData);
+        return CombineByteArrays(salt, aes.IV, encryptedData);
     }
 
-    internal static byte[] DecryptData(byte[] data, byte[] key)
+    internal static byte[] DecryptData(byte[] data, string passphrase)
     {
         Guard.Against.Null(data, nameof(data));
-        Guard.Against.Null(key, nameof(key));
-        
+        Guard.Against.Null(passphrase, nameof(passphrase));
+
+        var salt = new byte[16];
         var ivLength = Aes.Create().IV.Length;
         var iv = new byte[ivLength];
-        var encryptedData = new byte[data.Length - ivLength];
+        var encryptedData = new byte[data.Length - salt.Length - ivLength];
 
-        Array.Copy(data, 0, iv, 0, ivLength);
-        Array.Copy(data, ivLength, encryptedData, 0, data.Length - ivLength);
+        Array.Copy(data, 0, salt, 0, salt.Length);
+        Array.Copy(data, salt.Length, iv, 0, ivLength);
+        Array.Copy(data, salt.Length + ivLength, encryptedData, 0, encryptedData.Length);
+
+        // Derive a 32-byte key from the passphrase using PBKDF2 with SHA-256
+        using var deriveBytes = new Rfc2898DeriveBytes(passphrase, salt, 10000, HashAlgorithmName.SHA256);
+        var key = deriveBytes.GetBytes(32);
 
         using var aes = Aes.Create();
         aes.Key = key;
@@ -127,11 +139,17 @@ public static class SecurityUtils
     }
     
     // Helper function to combine byte arrays
-    private static byte[] CombineByteArrays(byte[] array1, byte[] array2)
+    private static byte[] CombineByteArrays(params byte[][] arrays)
     {
-        var combined = new byte[array1.Length + array2.Length];
-        Array.Copy(array1, 0, combined, 0, array1.Length);
-        Array.Copy(array2, 0, combined, array1.Length, array2.Length);
+        var combinedLength = arrays.Sum(a => a.Length);
+        var combined = new byte[combinedLength];
+        var offset = 0;
+        foreach (var array in arrays)
+        {
+            Array.Copy(array, 0, combined, offset, array.Length);
+            offset += array.Length;
+        }
+
         return combined;
     }
 }

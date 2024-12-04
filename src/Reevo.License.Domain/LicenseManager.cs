@@ -7,6 +7,7 @@ using Ardalis.GuardClauses;
 using Reevo.License.Domain.Exceptions;
 using Reevo.License.Domain.Models;
 using Reevo.License.Domain.Utilities;
+using System.Text;
 
 [assembly: InternalsVisibleTo("Aegis.Tests")]
 
@@ -84,12 +85,11 @@ public static class LicenseManager
 
         // Generate the file bytes for the license object
         var licenseData = JsonSerializer.SerializeToUtf8Bytes(license, new JsonSerializerOptions { WriteIndented = true });
-        var aesKey = SecurityUtils.GenerateAesKey(); // add passphrase or use Bytedash.Cryptography
-        var encryptedData = SecurityUtils.EncryptData(licenseData, aesKey);
-        var hash = SecurityUtils.CalculateSha256Hash(encryptedData);
         var hardwareId = HardwareUtils.GetHardwareId();
+        var encryptedData = SecurityUtils.EncryptData(licenseData, hardwareId);
+        var hash = SecurityUtils.CalculateSha256Hash(encryptedData);
         var signature = SecurityUtils.SignData(hash, privateKey ?? LicenseUtils.GetLicensingSecrets().PrivateKey);
-        var combinedLicenseData = CombineLicenseData(hash, signature, encryptedData, aesKey); // Exclude hash and aesKey (hardwareId)
+        var combinedLicenseData = CombineLicenseData(hash, signature, encryptedData);
 
         // Output to file if available
         if (filePath != null)
@@ -385,13 +385,13 @@ public static class LicenseManager
                 $"Concurrent user disconnect failed: {response.StatusCode} - {await response.Content.ReadAsStringAsync()}");
     }
 
-    private static byte[] CombineLicenseData(byte[] hash, byte[] signature, byte[] encryptedData, byte[] aesKey)
+    private static byte[] CombineLicenseData(byte[] hash, byte[] signature, byte[] encryptedData)
     {
         var combinedData = new byte[
             4 + hash.Length + // Length of hash + hash data
             4 + signature.Length + // Length of signature + signature data
-            4 + encryptedData.Length + // Length of encrypted data + data
-            4 + aesKey.Length // Length of AES key + key data
+            4 + encryptedData.Length // Length of encrypted data + data
+            //4 + aesKey.Length // Length of AES key + key data
         ];
 
         var offset = 0;
@@ -415,13 +415,13 @@ public static class LicenseManager
         Array.Copy(encryptedDataLengthBytes, 0, combinedData, offset, 4);
         offset += 4;
         Array.Copy(encryptedData, 0, combinedData, offset, encryptedData.Length);
-        offset += encryptedData.Length;
+        //offset += encryptedData.Length;
 
-        // Copy AES key length and AES key data
-        var aesKeyLengthBytes = BitConverter.GetBytes(aesKey.Length);
-        Array.Copy(aesKeyLengthBytes, 0, combinedData, offset, 4);
-        offset += 4;
-        Array.Copy(aesKey, 0, combinedData, offset, aesKey.Length);
+        //// Copy AES key length and AES key data
+        //var aesKeyLengthBytes = BitConverter.GetBytes(aesKey.Length);
+        //Array.Copy(aesKeyLengthBytes, 0, combinedData, offset, 4);
+        //offset += 4;
+        //Array.Copy(aesKey, 0, combinedData, offset, aesKey.Length);
 
         return combinedData;
     }

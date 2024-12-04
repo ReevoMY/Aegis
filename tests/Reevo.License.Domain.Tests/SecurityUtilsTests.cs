@@ -20,12 +20,12 @@ public class SecurityUtilsTests
     public void EncryptData_DecryptsDataCorrectly()
     {
         // Arrange
-        var key = SecurityUtils.GenerateAesKey();
         var testData = GenerateTestData(512);
+        var passphrase = HardwareUtils.GetHardwareId();
 
         // Act
-        var encryptedData = SecurityUtils.EncryptData(testData, key);
-        var decryptedData = SecurityUtils.DecryptData(encryptedData, key);
+        var encryptedData = SecurityUtils.EncryptData(testData, passphrase);
+        var decryptedData = SecurityUtils.DecryptData(encryptedData, passphrase);
 
         // Assert
         encryptedData.Should().NotEqual(testData);
@@ -37,10 +37,10 @@ public class SecurityUtilsTests
     public void EncryptData_ThrowsException_ForNullData()
     {
         // Arrange
-        var key = SecurityUtils.GenerateAesKey();
+        var passphrase = HardwareUtils.GetHardwareId();
 
         // Act & Assert
-        var act = () => SecurityUtils.EncryptData(null!, key);
+        var act = () => SecurityUtils.EncryptData(null!, passphrase);
         act.Should().Throw<ArgumentNullException>();
     }
 
@@ -59,10 +59,10 @@ public class SecurityUtilsTests
     public void DecryptData_ThrowsException_ForNullData()
     {
         // Arrange
-        var key = SecurityUtils.GenerateAesKey();
+        var passphrase = HardwareUtils.GetHardwareId();
 
         // Act & Assert
-        var act = () => SecurityUtils.DecryptData(null!, key);
+        var act = () => SecurityUtils.DecryptData(null!, passphrase);
         act.Should().Throw<ArgumentNullException>();
     }
 

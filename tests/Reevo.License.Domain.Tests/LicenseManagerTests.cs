@@ -374,7 +374,7 @@ public class LicenseManagerTests
         var publicKey = LicenseUtils.GetLicensingSecrets().PublicKey; // Get the public key
 
         // Act
-        var (hash, signature, _, _) = LicenseValidator.SplitLicenseData(licenseData);
+        var (hash, signature, _) = LicenseValidator.SplitLicenseData(licenseData);
         var isValid = SecurityUtils.VerifySignature(hash, signature, publicKey); // Verify signature of hash
 
         // Assert
@@ -392,7 +392,7 @@ public class LicenseManagerTests
         var invalidSignature = new byte[16]; // Create a fake, invalid signature
 
         // Act
-        var (hash, _, _, _) = LicenseValidator.SplitLicenseData(licenseData);
+        var (hash, _, _) = LicenseValidator.SplitLicenseData(licenseData);
 
         var isValid = SecurityUtils.VerifySignature(hash, invalidSignature, publicKey);
 

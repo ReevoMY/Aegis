@@ -251,10 +251,10 @@ public class LicenseValidatorTests
         var licenseData = LicenseManager.SaveLicense(license);
 
         // Tamper with the signature 
-        var (hash, signature, encryptedData, aesKey) = LicenseValidator.SplitLicenseData(licenseData);
+        var (hash, signature, encryptedData) = LicenseValidator.SplitLicenseData(licenseData);
         signature[0]++; // Modify a byte in the signature
         var combineLicenseDataMethod = typeof(LicenseManager).GetMethod("CombineLicenseData", BindingFlags.NonPublic | BindingFlags.Static);
-        licenseData = (byte[])combineLicenseDataMethod?.Invoke(null, [hash, signature, encryptedData, aesKey])!;
+        licenseData = (byte[])combineLicenseDataMethod?.Invoke(null, [hash, signature, encryptedData])!;
 
         // Act
         var isValid = LicenseValidator.VerifyLicenseData(licenseData, out _);
@@ -272,10 +272,10 @@ public class LicenseValidatorTests
         var licenseData = LicenseManager.SaveLicense(license);
 
         // Tamper with the encrypted data
-        var (hash, signature, encryptedData, aesKey) = LicenseValidator.SplitLicenseData(licenseData);
+        var (hash, signature, encryptedData) = LicenseValidator.SplitLicenseData(licenseData);
         encryptedData[0]++; // Modify a byte in the encrypted data
         var combineLicenseDataMethod = typeof(LicenseManager).GetMethod("CombineLicenseData", BindingFlags.NonPublic | BindingFlags.Static);
-        licenseData = (byte[])combineLicenseDataMethod?.Invoke(null, [hash, signature, encryptedData, aesKey])!;
+        licenseData = (byte[])combineLicenseDataMethod?.Invoke(null, [hash, signature, encryptedData])!;
 
         // Act
         var isValid = LicenseValidator.VerifyLicenseData(licenseData, out _);
